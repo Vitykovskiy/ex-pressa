@@ -68,10 +68,4 @@ export class CustomersBotController {
     await this.customers.update(customer.id, { name: newName });
     await ctx.reply(`Имя обновлено: ${newName}`);
   }
-
-  // Фолбэк для непонятных сообщений
-  @Hears(/.*/i)
-  async fallback(@Ctx() ctx: Context) {
-    await ctx.reply('Неизвестная команда. Используйте: /me, /setname <имя>');
-  }
 }

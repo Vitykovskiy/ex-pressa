@@ -40,4 +40,23 @@ export class MenuService {
   async findItemByName(name: string): Promise<MenuItem | null> {
     return this.items.findOne({ where: { name } });
   }
+
+  async findItemById(id: number): Promise<MenuItem> {
+    const item = await this.items.findOne({ where: { id } });
+    if (!item) throw new NotFoundException('Menu item not found');
+    return item;
+  }
+
+  async findMenuById(id: number): Promise<Menu> {
+    const menu = await this.menus.findOne({
+      where: { id },
+      relations: ['items'],
+    });
+    if (!menu) throw new NotFoundException('Menu not found');
+    return menu;
+  }
+
+  async listMenus(): Promise<Menu[]> {
+    return this.menus.find({ order: { id: 'DESC' } });
+  }
 }

@@ -1,22 +1,27 @@
-export type AnyGroup = MenuGroup | OptionsGroup;
+export type AnyGroup = DrinksGroup | OptionsGroup | OtherMenuGroup;
 
 interface BaseMenuGroup {
   id: number;
   key: string;
   name: string;
-  type: 'group' | 'options_group';
+  type: 'drinks_group' | 'options_group' | 'other_group';
   available: boolean;
-  items: MenuItemView[];
+  items: MenuMenuItem[];
 }
 
-export type MenuGroup = BaseMenuGroup & {
-  type: 'group';
-  items: (DrinkItemView | OtherItemView)[];
+export type DrinksGroup = BaseMenuGroup & {
+  type: 'drinks_group';
+  items: DrinkMenuItem[];
+};
+
+export type OtherMenuGroup = BaseMenuGroup & {
+  type: 'other_group';
+  items: OtherMenuItem[];
 };
 
 export type OptionsGroup = BaseMenuGroup & {
   type: 'options_group';
-  items: OptionItemView[];
+  items: OptionMenuItem[];
 };
 
 type BaseMenuItem = {
@@ -25,26 +30,26 @@ type BaseMenuItem = {
   description: string | null;
 };
 
-export type DrinkItemView = BaseMenuItem & {
+export type DrinkMenuItem = BaseMenuItem & {
   type: 'drink';
   optionsGroupKey: string | null;
-  sizes: MenuItemSize[];
+  sizes: DrinkSizeItem[];
 };
 
-export type OptionItemView = BaseMenuItem & {
+export type OptionMenuItem = BaseMenuItem & {
   type: 'option';
   price: number | null;
 };
 
-export type OtherItemView = BaseMenuItem & {
+export type OtherMenuItem = BaseMenuItem & {
   type: 'other';
   optionsGroupKey: string | null;
   price: number;
 };
 
-export type MenuItemView = DrinkItemView | OptionItemView | OtherItemView;
+export type MenuMenuItem = DrinkMenuItem | OptionMenuItem | OtherMenuItem;
 
-export interface MenuItemSize {
+export interface DrinkSizeItem {
   size: string;
   price: number;
 }

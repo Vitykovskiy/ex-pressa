@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
 import { MenuItem } from '../entities/menu-item.entity';
-import { AnyGroup, DrinkItemView, MenuGroup, MenuItemView } from './types';
+import { AnyGroup, DrinkMenuItem, MenuMenuItem } from './types';
 
 @Injectable()
 export class MenuService {
@@ -37,7 +37,12 @@ export class MenuService {
     });
 
     const groups = allMenuItems
-      .filter(({ type }) => type === 'group' || type === 'options_group')
+      .filter(
+        ({ type }) =>
+          type === 'drinks_group' ||
+          type === 'other_group' ||
+          type === 'options_group',
+      )
       .map((group) => {
         const items = allMenuItems
           .filter(({ parentKey }) => parentKey === group.key)
@@ -46,7 +51,7 @@ export class MenuService {
               case 'drink':
                 const existedDrink = acc.find(
                   ({ name }) => item.name === name,
-                ) as DrinkItemView;
+                ) as DrinkMenuItem;
 
                 if (existedDrink) {
                   existedDrink.sizes.push({
@@ -88,7 +93,7 @@ export class MenuService {
             }
 
             return acc;
-          }, [] as MenuItemView[]);
+          }, [] as MenuMenuItem[]);
 
         return {
           id: group.id,

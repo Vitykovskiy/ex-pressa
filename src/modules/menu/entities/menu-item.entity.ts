@@ -2,8 +2,9 @@ import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Menu } from './menu.entity';
 
 export type MenuItemType =
-  | 'group'
+  | 'drinks_group'
   | 'options_group'
+  | 'other_group'
   | 'drink'
   | 'option'
   | 'other'

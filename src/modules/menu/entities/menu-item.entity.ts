@@ -1,7 +1,13 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Menu } from './menu.entity';
 
-export type MenuItemType = 'drink' | 'option' | 'other' | null;
+export type MenuItemType =
+  | 'group'
+  | 'options_group'
+  | 'drink'
+  | 'option'
+  | 'other'
+  | null;
 
 @Entity('menu_items')
 export class MenuItem {

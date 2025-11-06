@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
 import { MenuItem } from '../entities/menu-item.entity';
+import { AnyGroup, DrinkItemView, MenuGroup, MenuItemView } from './types';
 
 @Injectable()
 export class MenuService {
@@ -30,10 +31,76 @@ export class MenuService {
     return menu;
   }
 
-  async listItems(): Promise<MenuItem[]> {
-    return this.items.find({
+  async listItems(): Promise<AnyGroup[]> {
+    const allMenuItems: MenuItem[] = await this.items.find({
       where: { available: true },
     });
+
+    const groups = allMenuItems
+      .filter(({ type }) => type === 'group' || type === 'options_group')
+      .map((group) => {
+        const items = allMenuItems
+          .filter(({ parentKey }) => parentKey === group.key)
+          .reduce((acc, item) => {
+            switch (item.type) {
+              case 'drink':
+                const existedDrink = acc.find(
+                  ({ name }) => item.name === name,
+                ) as DrinkItemView;
+
+                if (existedDrink) {
+                  existedDrink.sizes.push({
+                    size: item.size!,
+                    price: item.price!,
+                  });
+                } else {
+                  acc.push({
+                    id: item.id,
+                    name: item.name ?? '',
+                    type: 'drink',
+                    optionsGroupKey: item.optionsGroupKey,
+                    description: item.description,
+                    sizes: [{ size: item.size!, price: item.price! }],
+                  });
+                }
+                break;
+
+              case 'other':
+                acc.push({
+                  id: item.id,
+                  name: item.name ?? '',
+                  type: 'other',
+                  optionsGroupKey: item.optionsGroupKey,
+                  description: item.description,
+                  price: item.price!,
+                });
+                break;
+
+              case 'option':
+                acc.push({
+                  id: item.id,
+                  name: item.name ?? '',
+                  type: 'option',
+                  description: item.description,
+                  price: item.price ?? null,
+                });
+                break;
+            }
+
+            return acc;
+          }, [] as MenuItemView[]);
+
+        return {
+          id: group.id,
+          type: group.type,
+          name: group.name,
+          key: group.key,
+          available: group.available,
+          items,
+        } as AnyGroup;
+      });
+
+    return groups;
   }
 
   async findItemByName(name: string): Promise<MenuItem | null> {

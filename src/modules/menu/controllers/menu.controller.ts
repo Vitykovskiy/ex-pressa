@@ -11,7 +11,6 @@ export class MenuController {
     return this.menuService.getActiveMenu();
   }
 
-  // Все меню (без фильтра по датам)
   @Get()
   getMenus() {
     return this.menuService.listMenus();

@@ -1,9 +1,10 @@
+// src/modules/menu/services/menu-import.service.ts
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
-import { MenuItem } from '../entities/menu-item.entity';
 import { parseMenuExcel } from '../utils/parseMenuExcel';
+import { MenuItem } from '../entities/menu-item.entity';
 
 @Injectable()
 export class MenuImportService {
@@ -11,32 +12,43 @@ export class MenuImportService {
 
   constructor(
     @InjectRepository(Menu) private readonly menus: Repository<Menu>,
-    @InjectRepository(MenuItem) private readonly items: Repository<MenuItem>,
+    @InjectRepository(MenuItem)
+    private readonly entries: Repository<MenuItem>,
   ) {}
 
   async importFromBuffer(buffer: Buffer): Promise<Menu> {
-    const parsed = parseMenuExcel(buffer);
+    const parsed = parseMenuExcel(buffer); // ParsedMenuRow[]
 
     if (!parsed.length) {
       throw new BadRequestException('Файл пуст или содержит неверные данные.');
     }
 
+    const now = new Date();
+
+    const items = parsed.map((row) =>
+      this.entries.create({
+        id: row.id,
+        key: row.key,
+        parentKey: row.parentKey,
+        type: row.type,
+        optionsGroupKey: row.optionsGroupKey,
+        name: row.name,
+        size: row.size,
+        price: row.price,
+        description: row.description,
+        available: row.available,
+      } as Partial<MenuItem>),
+    );
+
     const menu = this.menus.create({
-      title: `Импорт ${new Date().toLocaleString('ru-RU')}`,
-      validFrom: new Date(),
-      items: parsed.map((r) =>
-        this.items.create({
-          name: r.name,
-          price: r.price,
-          isAvailable: r.isAvailable,
-          position: r.position,
-        }),
-      ),
+      title: `Импорт ${now.toLocaleString('ru-RU')}`,
+      validFrom: now,
+      items,
     });
 
     const saved = await this.menus.save(menu);
     this.logger.log(
-      `Импортировано ${parsed.length} позиций в меню #${saved.id}`,
+      `Импортировано ${parsed.length} записей в меню #${saved.id}`,
     );
     return saved;
   }

@@ -1,8 +1,0 @@
-export const enum OrderStatus {
-  CREATED = 'CREATED',
-  CONFIRMED = 'CONFIRMED',
-  PAID = 'PAID',
-  READY = 'READY',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}

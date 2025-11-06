@@ -32,8 +32,7 @@ export class MenuService {
 
   async listItems(): Promise<MenuItem[]> {
     return this.items.find({
-      where: { isAvailable: true },
-      order: { position: 'ASC' },
+      where: { available: true },
     });
   }
 

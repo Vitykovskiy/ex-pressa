@@ -1,5 +1,5 @@
-import { Update, Start, Command, Ctx, Hears } from 'nestjs-telegraf';
-import { Context } from 'telegraf';
+import { Update, Start, Ctx } from 'nestjs-telegraf';
+import { Context, Markup } from 'telegraf';
 import { CustomersService } from '../customers.service';
 
 function getFrom(ctx: Context) {
@@ -28,44 +28,10 @@ export class CustomersBotController {
     });
 
     await ctx.reply(
-      `Здравствуйте, ${customer.name}. Ваш профиль создан. Команды: /me, /setname <имя>`,
+      `Здравствуйте, ${customer.name}`,
+      Markup.keyboard([['/menu']])
+        .resize()
+        .oneTime(),
     );
-  }
-
-  @Command('me')
-  async me(@Ctx() ctx: Context) {
-    const from = getFrom(ctx);
-    if (!from.tgId) return ctx.reply('Не удалось определить Telegram ID.');
-
-    const customer = await this.customers.findByTgId(from.tgId);
-    if (!customer) return ctx.reply('Профиль не найден. Наберите /start.');
-
-    await ctx.reply(
-      [
-        `ID: ${customer.id}`,
-        `Имя: ${customer.name}`,
-        `Username: ${customer.tgUsername ?? '—'}`,
-        `Активен: ${customer.isActive ? 'да' : 'нет'}`,
-        `Создан: ${customer.createdAt.toISOString()}`,
-      ].join('\n'),
-    );
-  }
-
-  // Пример: /setname Иван Петров
-  @Hears(/^\/setname\s+(.+)/i)
-  async setName(@Ctx() ctx: Context) {
-    const from = getFrom(ctx);
-    if (!from.tgId) return ctx.reply('Не удалось определить Telegram ID.');
-
-    const match = (ctx.message as any).text.match(/^\/setname\s+(.+)/i);
-    const newName = match?.[1]?.trim();
-    if (!newName) return ctx.reply('Укажите имя: /setname Иван Петров');
-
-    const customer = await this.customers.findByTgId(from.tgId);
-    if (!customer) return ctx.reply('Профиль не найден. Наберите /start.');
-
-    customer.name = newName;
-    await this.customers.update(customer.id, { name: newName });
-    await ctx.reply(`Имя обновлено: ${newName}`);
   }
 }

@@ -1,36 +1,47 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Menu } from './menu.entity';
+
+export type MenuItemType = 'drink' | 'option' | 'other' | null;
 
 @Entity('menu_items')
 export class MenuItem {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'integer' })
   id: number;
 
   @ManyToOne(() => Menu, (menu) => menu.items, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'menu_id' })
   menu: Menu;
 
-  @Column({ length: 120 })
-  name: string;
+  @Column({ name: 'key', type: 'varchar', length: 64, nullable: true })
+  key: string | null;
 
-  @Column({ type: 'real' })
-  price: number;
+  // parent_key: ключ родительской группы / options_group
+  @Column({ name: 'parent_key', type: 'varchar', length: 64, nullable: true })
+  parentKey: string | null;
 
-  @Column({ default: true })
-  isAvailable: boolean;
+  @Column({ name: 'type', type: 'varchar', length: 16, nullable: true })
+  type: MenuItemType;
 
-  @Column({ type: 'int', nullable: true })
-  position?: number;
+  @Column({
+    name: 'options_group_key',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+  })
+  optionsGroupKey: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @Column({ name: 'name', type: 'varchar', length: 255, nullable: true })
+  name: string | null;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @Column({ name: 'size', type: 'varchar', length: 8, nullable: true })
+  size: string | null;
+
+  @Column({ name: 'price', type: 'real', nullable: true })
+  price: number | null;
+
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ name: 'available', type: 'boolean', default: true })
+  available: boolean;
 }

@@ -48,7 +48,7 @@ export class MenuService {
           .filter(({ parentKey }) => parentKey === group.key)
           .reduce((acc, item) => {
             switch (item.type) {
-              case 'drink':
+              case 'drink': {
                 const existedDrink = acc.find(
                   ({ name }) => item.name === name,
                 ) as DrinkMenuItem;
@@ -69,6 +69,7 @@ export class MenuService {
                   });
                 }
                 break;
+              }
 
               case 'other':
                 acc.push({

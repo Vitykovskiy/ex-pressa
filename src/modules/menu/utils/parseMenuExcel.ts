@@ -1,5 +1,21 @@
 import * as XLSX from 'xlsx';
 
+type ExcelCellValue = string | number | boolean | null | undefined;
+
+interface RawExcelRow extends Record<string, ExcelCellValue> {
+  key?: ExcelCellValue;
+  group_name?: ExcelCellValue;
+  type?: ExcelCellValue;
+  name?: ExcelCellValue;
+  description?: ExcelCellValue;
+  options_group_key?: ExcelCellValue;
+  available?: ExcelCellValue;
+  price?: ExcelCellValue;
+  s?: ExcelCellValue;
+  m?: ExcelCellValue;
+  l?: ExcelCellValue;
+}
+
 export interface ParsedMenuRow {
   id: number; // порядковый номер строки результата (1..N)
   key: string | null; // key из upload_base (только у заголовков групп/опций)
@@ -16,7 +32,7 @@ export interface ParsedMenuRow {
 export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
-  const excelRows: any[] = XLSX.utils.sheet_to_json(
+  const excelRows: RawExcelRow[] = XLSX.utils.sheet_to_json<RawExcelRow>(
     workbook.Sheets[sheetName],
     {
       defval: '',
@@ -36,13 +52,14 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
     });
   };
 
-  const toStringOrNull = (value: any): string | null => {
+  const toStringOrNull = (value: ExcelCellValue): string | null => {
     if (value === undefined || value === null) return null;
-    const valueString = String(value).trim();
-    return valueString === '' ? null : valueString;
+    const valueString = typeof value === 'string' ? value : String(value);
+    const trimmedValue = valueString.trim();
+    return trimmedValue === '' ? null : trimmedValue;
   };
 
-  const toNumberOrNull = (value: any): number | null => {
+  const toNumberOrNull = (value: ExcelCellValue): number | null => {
     const numericString = toStringOrNull(value);
     if (!numericString) return null;
     const numericValue = Number(numericString.replace(',', '.'));
@@ -51,10 +68,9 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
 
   for (const rawRow of excelRows) {
     // пропускаем полностью пустые строки
-    const hasValues = Object.values(rawRow).some((cellValue) => {
-      if (cellValue === undefined || cellValue === null) return false;
-      return String(cellValue).trim() !== '';
-    });
+    const hasValues = Object.values(rawRow).some(
+      (cellValue) => toStringOrNull(cellValue) !== null,
+    );
     if (!hasValues) continue;
 
     const key = toStringOrNull(rawRow.key);
@@ -146,7 +162,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
 
       // Разворачиваем s/m/l в три строки
       (['s', 'm', 'l'] as const).forEach((sizeKey) => {
-        const rawPrice = (rawRow as any)[sizeKey];
+        const rawPrice = rawRow[sizeKey];
         const price = toNumberOrNull(rawPrice);
         if (price === null) return;
 

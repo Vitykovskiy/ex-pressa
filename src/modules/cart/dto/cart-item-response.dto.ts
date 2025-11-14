@@ -1,17 +1,25 @@
-import type {
-  CartItemSelectedOption,
-  CartItemSize,
-} from '../entities/cart-item.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { CartItemSize } from '../entities/cart-item.entity';
 
-export interface CartItemResponseDto {
+export class CartItemResponseDto {
+  @ApiProperty({ description: 'Cart item identifier' })
   id: number;
+
+  @ApiProperty({
+    description: 'Menu item identifier associated with the cart item',
+  })
   menuItemId: number;
-  groupId: number | null;
-  name: string;
-  price: number;
+
+  @ApiProperty({ description: 'Number of units in the cart' })
   quantity: number;
+
+  @ApiProperty({ enum: ['s', 'm', 'l'], nullable: true })
   size: CartItemSize | null;
-  selectedOptions: CartItemSelectedOption[] | null;
-  createdAt: string;
-  updatedAt: string;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    type: [Number],
+    description: 'Identifiers of selected option menu items',
+  })
+  selectedOptions: number[] | null;
 }

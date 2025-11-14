@@ -145,14 +145,12 @@ export class CartService {
     return {
       id: item.id,
       menuItemId: item.menuItemId,
-      groupId: item.groupId,
-      name: item.name,
-      price: item.price,
       quantity: item.quantity,
       size: item.size,
-      selectedOptions: item.selectedOptions ?? null,
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
+      selectedOptions: item.selectedOptions
+        ? item.selectedOptions.map((option) => option.id)
+        : null,
     };
   }
 }
+

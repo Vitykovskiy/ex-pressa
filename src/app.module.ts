@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { CustomersModule } from './modules/customers/customers.module';
 import { MenuModule } from './modules/menu/menu.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MenuModule } from './modules/menu/menu.module';
     }),
     CustomersModule,
     MenuModule,
+    CartModule,
   ],
 })
 export class AppModule {}

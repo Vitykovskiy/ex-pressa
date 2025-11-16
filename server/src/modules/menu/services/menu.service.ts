@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
@@ -27,7 +27,7 @@ export class MenuService {
       order: { id: 'DESC' },
     });
 
-    if (!menu) throw new NotFoundException('No active menu');
+    if (!menu) throw new NotFoundException('Активное меню не найдено');
     return menu;
   }
 
@@ -115,7 +115,7 @@ export class MenuService {
 
   async findItemById(id: number): Promise<MenuItem> {
     const item = await this.items.findOne({ where: { id } });
-    if (!item) throw new NotFoundException('Menu item not found');
+    if (!item) throw new NotFoundException('Позиция меню не найдена');
     return item;
   }
 
@@ -124,7 +124,7 @@ export class MenuService {
       where: { id },
       relations: ['items'],
     });
-    if (!menu) throw new NotFoundException('Menu not found');
+    if (!menu) throw new NotFoundException('Меню не найдено');
     return menu;
   }
 

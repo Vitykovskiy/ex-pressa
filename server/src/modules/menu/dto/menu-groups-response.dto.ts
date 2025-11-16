@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+﻿import { ApiProperty } from '@nestjs/swagger';
 
 export class MenuGroupItemSizeDto {
   @ApiProperty({ example: 'M' })
@@ -12,10 +12,14 @@ export class MenuGroupItemDto {
   @ApiProperty({ example: 101 })
   id: number;
 
-  @ApiProperty({ example: 'Americano' })
+  @ApiProperty({ example: 'Американо' })
   name: string;
 
-  @ApiProperty({ required: false, nullable: true, example: 'Freshly brewed espresso with water' })
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    example: 'Эспрессо со свежей водой',
+  })
   description: string | null;
 
   @ApiProperty({ enum: ['drink', 'option', 'other'] })
@@ -38,7 +42,7 @@ export class MenuGroupResponseDto {
   @ApiProperty({ example: 'DRINKS_HOT' })
   key: string;
 
-  @ApiProperty({ example: 'Hot drinks' })
+  @ApiProperty({ example: 'Горячие напитки' })
   name: string;
 
   @ApiProperty({ enum: ['drinks_group', 'options_group', 'other_group'] })

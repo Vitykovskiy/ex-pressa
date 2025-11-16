@@ -42,7 +42,7 @@ export class CartService {
       where: { id: cartItemId },
     });
     if (!existing) {
-      throw new NotFoundException('Cart item not found');
+      throw new NotFoundException('Позиция корзины не найдена');
     }
 
     const payload = await this.buildCartItemState(dto);
@@ -58,7 +58,7 @@ export class CartService {
   async removeItem(cartItemId: number): Promise<void> {
     const result = await this.cartItemsRepository.delete(cartItemId);
     if (!result.affected) {
-      throw new NotFoundException('Cart item not found');
+      throw new NotFoundException('Позиция корзины не найдена');
     }
   }
 
@@ -76,14 +76,14 @@ export class CartService {
   private async findMenuItem(id: number): Promise<MenuItem> {
     const menuItem = await this.menuItemsRepository.findOne({ where: { id } });
     if (!menuItem) {
-      throw new NotFoundException('Menu item not found');
+      throw new NotFoundException('Позиция меню не найдена');
     }
     if (
       menuItem.type === 'drinks_group' ||
       menuItem.type === 'options_group' ||
       menuItem.type === 'other_group'
     ) {
-      throw new BadRequestException('Groups cannot be added to cart');
+      throw new BadRequestException('Группы нельзя добавлять в корзину');
     }
     return menuItem;
   }
@@ -110,18 +110,18 @@ export class CartService {
 
     if (optionEntities.length !== uniqueIds.length) {
       throw new NotFoundException(
-        'One or more selected options were not found',
+        'Один или несколько выбранных вариантов не найдены',
       );
     }
 
     return optionIds.map((optionId) => {
       const option = optionEntities.find((entity) => entity.id === optionId);
       if (!option) {
-        throw new NotFoundException(`Selected option ${optionId} not found`);
+        throw new NotFoundException(`Выбранный вариант  не найден`);
       }
       if (option.type !== 'option') {
         throw new BadRequestException(
-          'Only option items can be used as selected options',
+          'В качестве опций можно выбирать только элементы типа option',
         );
       }
 
@@ -149,15 +149,14 @@ export class CartService {
     requestedSize?: CartItemSize,
   ): CartItemSize | null {
     const normalizedItemSize = (menuItemSize as CartItemSize | null) ?? null;
-    console.log('menuItemSize', menuItemSize);
-    console.log('requestedSize', requestedSize);
-    console.log('normalizedItemSize', normalizedItemSize);
     if (
       normalizedItemSize &&
       requestedSize &&
       normalizedItemSize !== requestedSize
     ) {
-      throw new BadRequestException('Selected size does not match menu item');
+      throw new BadRequestException(
+        'Выбранный размер не совпадает с размером позиции меню',
+      );
     }
 
     return requestedSize ?? normalizedItemSize ?? null;

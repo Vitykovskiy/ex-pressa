@@ -18,20 +18,20 @@ import { CartService } from './cart.service';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { CartItemResponseDto } from './dto/cart-item-response.dto';
 
-@ApiTags('cart')
+@ApiTags('Корзина')
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post('items')
-  @ApiOperation({ summary: 'Add a menu item to the cart' })
+  @ApiOperation({ summary: 'Добавить позицию меню в корзину' })
   @ApiCreatedResponse({ type: CartItemResponseDto })
   createCartItem(@Body() dto: CreateCartItemDto) {
     return this.cartService.createItem(dto);
   }
 
   @Put('items/:id')
-  @ApiOperation({ summary: 'Update a cart item by id' })
+  @ApiOperation({ summary: 'Обновить позицию корзины по идентификатору' })
   @ApiOkResponse({ type: CartItemResponseDto })
   updateCartItem(
     @Param('id', ParseIntPipe) id: number,
@@ -41,14 +41,14 @@ export class CartController {
   }
 
   @Get('items')
-  @ApiOperation({ summary: 'List all items currently in the cart' })
+  @ApiOperation({ summary: 'Получить все позиции в корзине' })
   @ApiOkResponse({ type: [CartItemResponseDto] })
   getCartItems() {
     return this.cartService.listItems();
   }
 
   @Delete('items/:id')
-  @ApiOperation({ summary: 'Remove a cart item by id' })
+  @ApiOperation({ summary: 'Удалить позицию корзины по идентификатору' })
   @ApiOkResponse({ schema: { example: { success: true } } })
   async removeCartItem(@Param('id', ParseIntPipe) id: number) {
     await this.cartService.removeItem(id);
@@ -56,7 +56,7 @@ export class CartController {
   }
 
   @Delete('items')
-  @ApiOperation({ summary: 'Remove every item from the cart' })
+  @ApiOperation({ summary: 'Очистить корзину' })
   @ApiOkResponse({ schema: { example: { success: true } } })
   async clearCart() {
     await this.cartService.clear();

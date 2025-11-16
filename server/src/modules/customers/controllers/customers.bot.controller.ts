@@ -1,4 +1,4 @@
-import { Update, Start, Ctx } from 'nestjs-telegraf';
+﻿import { Update, Start, Ctx } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { CustomersService } from '../customers.service';
 
@@ -10,7 +10,7 @@ function getFrom(ctx: Context) {
     name:
       [from?.first_name, from?.last_name].filter(Boolean).join(' ') ||
       from?.username ||
-      'User',
+      'Гость',
   };
 }
 

@@ -41,7 +41,8 @@ export class Menu {
 
   @ApiProperty({
     type: () => [MenuItem],
-    description: 'Items included in the menu (loaded only in specific endpoints)',
+    description:
+      'Items included in the menu (loaded only in specific endpoints)',
     required: false,
   })
   @OneToMany(() => MenuItem, (item) => item.menu, { cascade: true })

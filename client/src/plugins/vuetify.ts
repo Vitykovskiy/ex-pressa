@@ -12,14 +12,14 @@ const light: ThemeDefinition = {
 const dark: ThemeDefinition = {
   dark: true,
   colors: {
-    background: "#0000ff", // glowing blue
-    surface: "#1E1E1E", // темный оттенок для поверхности
-    primary: "#00ffff", // светло-голубой для акцентов
-    secondary: "#0088cc", // более темный синий для второстепенных элементов
-    success: "#388E3C", // стандартный зеленый для успеха
-    warning: "#FBC02D", // желтый для предупреждений
-    error: "#D32F2F", // красный для ошибок
-    info: "#1976D2", // синий для информационных сообщений
+    background: "#0000ff",
+    surface: "#1E1E1E",
+    primary: "#00ffff",
+    secondary: "#0088cc",
+    success: "#388E3C",
+    warning: "#FBC02D",
+    error: "#D32F2F",
+    info: "#1976D2",
   },
 };
 

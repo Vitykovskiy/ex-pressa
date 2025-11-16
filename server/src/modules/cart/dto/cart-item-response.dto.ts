@@ -1,16 +1,16 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { CartItemSize } from '../entities/cart-item.entity';
 
 export class CartItemResponseDto {
-  @ApiProperty({ description: 'Cart item identifier' })
+  @ApiProperty({ description: 'Идентификатор записи в корзине' })
   id: number;
 
   @ApiProperty({
-    description: 'Menu item identifier associated with the cart item',
+    description: 'Идентификатор позиции меню, связанной с корзиной',
   })
   menuItemId: number;
 
-  @ApiProperty({ description: 'Number of units in the cart' })
+  @ApiProperty({ description: 'Количество единиц в корзине' })
   quantity: number;
 
   @ApiProperty({ enum: ['s', 'm', 'l'], nullable: true })
@@ -19,7 +19,7 @@ export class CartItemResponseDto {
   @ApiPropertyOptional({
     nullable: true,
     type: [Number],
-    description: 'Identifiers of selected option menu items',
+    description: 'Идентификаторы выбранных опций меню',
   })
   selectedOptions: number[] | null;
 }

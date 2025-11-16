@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -16,7 +16,8 @@ const envFileCandidates = [
 ];
 
 const configEnvFilePath = envFileCandidates.filter(
-  (filePath, index, array) => array.indexOf(filePath) === index && existsSync(filePath),
+  (filePath, index, array) =>
+    array.indexOf(filePath) === index && existsSync(filePath),
 );
 
 @Module({
@@ -39,7 +40,7 @@ const configEnvFilePath = envFileCandidates.filter(
       useFactory: (config: ConfigService) => {
         const token = config.get<string>('TELEGRAM_BOT_TOKEN', '');
         if (!token) {
-          throw new Error('TELEGRAM_BOT_TOKEN is missing in .env');
+          throw new Error('Не указан TELEGRAM_BOT_TOKEN в .env');
         }
         return { token };
       },

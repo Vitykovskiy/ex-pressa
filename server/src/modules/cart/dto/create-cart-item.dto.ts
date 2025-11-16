@@ -1,13 +1,13 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsIn, IsInt, IsOptional, Min } from 'class-validator';
 import type { CartItemSize } from '../entities/cart-item.entity';
 
 export class CreateCartItemDto {
-  @ApiProperty({ description: 'Menu item identifier' })
+  @ApiProperty({ description: 'Идентификатор позиции меню' })
   @IsInt()
   id: number;
 
-  @ApiProperty({ description: 'Number of units to add', minimum: 1 })
+  @ApiProperty({ description: 'Количество добавляемых единиц', minimum: 1 })
   @IsInt()
   @Min(1)
   quantity: number;
@@ -18,7 +18,7 @@ export class CreateCartItemDto {
   size?: CartItemSize;
 
   @ApiPropertyOptional({
-    description: 'Identifiers of selected option items',
+    description: 'Идентификаторы выбранных опций',
     type: [Number],
     nullable: true,
   })

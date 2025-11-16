@@ -1,11 +1,12 @@
-import { Update, Ctx, Command, On } from 'nestjs-telegraf';
+﻿import { Update, Ctx, Command, On } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { MenuImportService } from '../services/menu-import.service';
 import { Message } from 'telegraf/types';
 import { ConfigService } from '@nestjs/config';
 
 @Update()
-export class MenuBotController {  private readonly webAppUrl: string;
+export class MenuBotController {
+  private readonly webAppUrl: string;
 
   constructor(
     private readonly importer: MenuImportService,
@@ -20,16 +21,16 @@ export class MenuBotController {  private readonly webAppUrl: string;
   @Command('menu')
   async showMenu(@Ctx() ctx: Context) {
     return ctx.reply(
-      'Р С›РЎвЂљР С”РЎР‚РЎвЂ№Р Р†Р В°РЎР‹ Р СР ВµР Р…РЎР‹:',
+      'Откройте цифровое меню:',
       Markup.inlineKeyboard([
-        [Markup.button.webApp('Р С›РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљРЎРЉ Р СР ВµР Р…РЎР‹', this.webAppUrl)],
+        [Markup.button.webApp('Перейти в меню', this.webAppUrl)],
       ]),
     );
   }
 
   @Command('importmenu')
   async importPrompt(@Ctx() ctx: Context) {
-    await ctx.reply('Р С›РЎвЂљР С—РЎР‚Р В°Р Р†РЎРЉРЎвЂљР Вµ Excel-РЎвЂћР В°Р в„–Р В» РЎРѓ Р СР ВµР Р…РЎР‹ (.xlsx).');
+    await ctx.reply('Загрузите Excel-файл с меню (.xlsx).');
   }
 
   @On('document')
@@ -38,7 +39,7 @@ export class MenuBotController {  private readonly webAppUrl: string;
     const file = message.document;
 
     if (!file?.file_id) {
-      return ctx.reply('Р В¤Р В°Р в„–Р В» Р Р…Р Вµ Р Р…Р В°Р в„–Р Т‘Р ВµР Р….');
+      return ctx.reply('Не удалось определить файл.');
     }
 
     const fileLink = await ctx.telegram.getFileLink(file.file_id);
@@ -46,8 +47,6 @@ export class MenuBotController {  private readonly webAppUrl: string;
     const buffer = Buffer.from(await res.arrayBuffer());
 
     const menu = await this.importer.importFromBuffer(buffer);
-    await ctx.reply(
-      `РІСљвЂ¦ Р ВР СР С—Р С•РЎР‚РЎвЂљР С‘РЎР‚Р С•Р Р†Р В°Р Р…Р С• Р СР ВµР Р…РЎР‹ "${menu.title}" РЎРѓ ${menu.items.length} Р С—Р С•Р В·Р С‘РЎвЂ Р С‘РЎРЏР СР С‘.`,
-    );
+    await ctx.reply(`Готово: загружено ${menu.items.length} позиций.`);
   }
 }

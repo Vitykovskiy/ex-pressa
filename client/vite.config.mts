@@ -4,7 +4,7 @@ import Vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import Fonts from "unplugin-fonts/vite";
 import VueRouter from "unplugin-vue-router/vite";
 
-// Utilities
+// Вспомогательные константы
 import { defineConfig, loadEnv } from "vite";
 import { fileURLToPath, URL } from "node:url";
 import { resolve } from "node:path";
@@ -23,7 +23,7 @@ const safeParseUrl = (value?: string) => {
   }
 };
 
-// https://vitejs.dev/config/
+// Настройка Vite
 export default defineConfig(({ mode }) => {
   const sharedEnv = loadEnv(mode, repoRoot, "");
   const localEnv = loadEnv(mode, packageDir, "");

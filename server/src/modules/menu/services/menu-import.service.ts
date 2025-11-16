@@ -1,5 +1,4 @@
-// src/modules/menu/services/menu-import.service.ts
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
@@ -17,7 +16,7 @@ export class MenuImportService {
   ) {}
 
   async importFromBuffer(buffer: Buffer): Promise<Menu> {
-    const parsed = parseMenuExcel(buffer); // ParsedMenuRow[]
+    const parsed = parseMenuExcel(buffer);
 
     if (!parsed.length) {
       throw new BadRequestException('Файл пуст или содержит неверные данные.');

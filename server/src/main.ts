@@ -1,11 +1,12 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
-export const WEB_APP_URL = process.env.WEB_APP_URL ?? 'http://localhost:3000';
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const webAppUrl = configService.get<string>('WEB_APP_URL', 'http://localhost:5173');
 
   const config = new DocumentBuilder()
     .setTitle('Ex-Pressa API')
@@ -16,12 +17,13 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.enableCors({
-    origin: WEB_APP_URL,
+    origin: webAppUrl,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: false,
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = Number(configService.get('PORT', 3000));
+  await app.listen(port);
 }
 void bootstrap();

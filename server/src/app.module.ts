@@ -1,16 +1,29 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { CustomersModule } from './modules/customers/customers.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { CartModule } from './modules/cart/cart.module';
 
+const envFileCandidates = [
+  join(__dirname, '..', '..', '.env'),
+  join(__dirname, '..', '..', '..', '.env'),
+  join(process.cwd(), '.env'),
+  join(process.cwd(), '..', '.env'),
+];
+
+const configEnvFilePath = envFileCandidates.filter(
+  (filePath, index, array) => array.indexOf(filePath) === index && existsSync(filePath),
+);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: configEnvFilePath.length ? configEnvFilePath : undefined,
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

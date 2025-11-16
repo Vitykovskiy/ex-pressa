@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -24,23 +24,42 @@ export class CartService {
   ) {}
 
   async createItem(dto: CreateCartItemDto): Promise<CartItemResponseDto> {
-    const menuItem = await this.findMenuItem(dto.id);
-    const groupId = await this.resolveGroupId(menuItem.parentKey);
-    const selectedOptions = await this.loadSelectedOptions(dto.selectedOptions);
-    const unitPrice = this.calculateUnitPrice(menuItem.price, selectedOptions);
-
+    const payload = await this.buildCartItemState(dto);
     const cartItem = this.cartItemsRepository.create({
-      menuItemId: menuItem.id,
-      groupId,
-      name: menuItem.name ?? '',
-      price: unitPrice,
+      ...payload,
       quantity: dto.quantity,
-      size: this.resolveSize(menuItem.size, dto.size),
-      selectedOptions,
     });
 
     const saved = await this.cartItemsRepository.save(cartItem);
     return this.toResponseDto(saved);
+  }
+
+  async updateItem(
+    cartItemId: number,
+    dto: CreateCartItemDto,
+  ): Promise<CartItemResponseDto> {
+    const existing = await this.cartItemsRepository.findOne({
+      where: { id: cartItemId },
+    });
+    if (!existing) {
+      throw new NotFoundException('Cart item not found');
+    }
+
+    const payload = await this.buildCartItemState(dto);
+    const saved = await this.cartItemsRepository.save({
+      ...existing,
+      ...payload,
+      quantity: dto.quantity,
+    });
+
+    return this.toResponseDto(saved);
+  }
+
+  async removeItem(cartItemId: number): Promise<void> {
+    const result = await this.cartItemsRepository.delete(cartItemId);
+    if (!result.affected) {
+      throw new NotFoundException('Cart item not found');
+    }
   }
 
   async listItems(): Promise<CartItemResponseDto[]> {
@@ -130,6 +149,9 @@ export class CartService {
     requestedSize?: CartItemSize,
   ): CartItemSize | null {
     const normalizedItemSize = (menuItemSize as CartItemSize | null) ?? null;
+    console.log('menuItemSize', menuItemSize);
+    console.log('requestedSize', requestedSize);
+    console.log('normalizedItemSize', normalizedItemSize);
     if (
       normalizedItemSize &&
       requestedSize &&
@@ -139,6 +161,29 @@ export class CartService {
     }
 
     return requestedSize ?? normalizedItemSize ?? null;
+  }
+
+  private async buildCartItemState(dto: CreateCartItemDto): Promise<{
+    menuItemId: number;
+    groupId: number | null;
+    name: string;
+    price: number;
+    size: CartItemSize | null;
+    selectedOptions: CartItemSelectedOption[] | null;
+  }> {
+    const menuItem = await this.findMenuItem(dto.id);
+    const groupId = await this.resolveGroupId(menuItem.parentKey);
+    const selectedOptions = await this.loadSelectedOptions(dto.selectedOptions);
+    const unitPrice = this.calculateUnitPrice(menuItem.price, selectedOptions);
+
+    return {
+      menuItemId: menuItem.id,
+      groupId,
+      name: menuItem.name ?? '',
+      price: unitPrice,
+      size: this.resolveSize(menuItem.size, dto.size),
+      selectedOptions,
+    };
   }
 
   private toResponseDto(item: CartItem): CartItemResponseDto {
@@ -153,4 +198,3 @@ export class CartService {
     };
   }
 }
-

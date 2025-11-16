@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+﻿import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -21,11 +30,29 @@ export class CartController {
     return this.cartService.createItem(dto);
   }
 
+  @Put('items/:id')
+  @ApiOperation({ summary: 'Update a cart item by id' })
+  @ApiOkResponse({ type: CartItemResponseDto })
+  updateCartItem(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateCartItemDto,
+  ) {
+    return this.cartService.updateItem(id, dto);
+  }
+
   @Get('items')
   @ApiOperation({ summary: 'List all items currently in the cart' })
   @ApiOkResponse({ type: [CartItemResponseDto] })
   getCartItems() {
     return this.cartService.listItems();
+  }
+
+  @Delete('items/:id')
+  @ApiOperation({ summary: 'Remove a cart item by id' })
+  @ApiOkResponse({ schema: { example: { success: true } } })
+  async removeCartItem(@Param('id', ParseIntPipe) id: number) {
+    await this.cartService.removeItem(id);
+    return { success: true } as const;
   }
 
   @Delete('items')

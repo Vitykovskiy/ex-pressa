@@ -16,10 +16,10 @@ export class Menu {
   @Column({ length: 120 })
   title: string;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   validFrom?: Date;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   validTo?: Date;
 
   @OneToMany(() => MenuItem, (item) => item.menu, { cascade: true })

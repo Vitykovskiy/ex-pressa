@@ -9,7 +9,7 @@ import { MenuModule } from './modules/menu/menu.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.ENV_FILE ?? '.env.dev',
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

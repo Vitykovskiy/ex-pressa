@@ -1,6 +1,6 @@
 # ex-pressa
 
-Телеграм‑бот на NestJS. База данных — PostgreSQL (в dev поднимается через Docker).
+Телеграм-бот на NestJS. База данных — PostgreSQL (в dev поднимается через Docker).
 
 ## Требования
 
@@ -15,44 +15,45 @@ npm install
 
 ## Настройка окружения
 
-Создай `.env` из шаблона и заполни значения:
+Используются два файла окружения:
 
-```bash
-copy .env.example .env
-```
+- `.env.dev` — для dev (сервис локально, БД в Docker)
+- `.env.prod` — для prod (все в Docker)
+
+Открой нужный файл и заполни значения (минимум `TELEGRAM_BOT_TOKEN`).
 
 ## Запуск (dev)
 
 База PostgreSQL в Docker, приложение локально:
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.dev.yaml --env-file .env.dev up -d
 npm run start:dev
 ```
 
 ## Запуск (prod)
 
-1) Создай `.env` на сервере (не коммить в git).
-2) Установи зависимости и собери проект:
+1. Создать `.env.prod` на сервере
+2. Установить зависимости и собрать проект:
 
 ```bash
 npm install
 npm run build
 ```
 
-3) Запуск:
+3. Запуск:
 
 ```bash
-npm run start:prod
+docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d
 ```
 
 ## Переменные окружения
 
 - `TELEGRAM_BOT_TOKEN` — токен бота
-- `DB_HOST` — хост PostgreSQL (в dev: `postgres`)
+- `DB_HOST` — хост PostgreSQL (dev: `localhost`, prod: `postgres`)
 - `DB_PORT` — порт PostgreSQL (обычно `5432`)
 - `DB_USER` — пользователь БД
 - `DB_PASS` — пароль БД
 - `DB_NAME` — имя БД
 - `PORT` — порт приложения
-- `WEB_APP_URL` — URL веб‑приложения
+- `WEB_APP_URL` — URL веб-приложения

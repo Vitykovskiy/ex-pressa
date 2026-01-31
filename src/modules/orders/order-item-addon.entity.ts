@@ -19,8 +19,8 @@ export class OrderItemAddon {
   @Column({ name: 'addon_name', type: 'text' })
   addonName: string;
 
-  @Column({ name: 'qty', type: 'integer' })
-  qty: number;
+  @Column({ name: 'quantity', type: 'integer' })
+  quantity: number;
 
   @Column({ name: 'unit_price_rub', type: 'integer' })
   unitPriceRub: number;

@@ -21,8 +21,8 @@ export class OrderItem {
   @Column({ name: 'product_name', type: 'text' })
   productName: string;
 
-  @Column({ name: 'qty', type: 'integer' })
-  qty: number;
+  @Column({ name: 'quantity', type: 'integer' })
+  quantity: number;
 
   @Column({ name: 'size_code', type: 'varchar', length: 8, nullable: true })
   sizeCode?: string;

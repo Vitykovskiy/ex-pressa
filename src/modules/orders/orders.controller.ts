@@ -2,6 +2,7 @@ import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { Order } from './order.entity';
 
 @ApiTags('Заказы')
 @Controller('orders')
@@ -13,7 +14,7 @@ export class OrdersController {
   createFromCart(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateOrderDto,
-  ) {
+  ): Promise<Order> {
     return this.orders.createFromCart(userId, dto);
   }
 }

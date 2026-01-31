@@ -11,6 +11,7 @@ import {
 import { User } from '../users/user.entity';
 import { OrderStatus } from './order-status.enum';
 import { OrderItem } from './order-item.entity';
+import { TimeSlot } from './time-slot.entity';
 
 @Entity('orders')
 export class Order {
@@ -20,6 +21,10 @@ export class Order {
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  @ManyToOne(() => TimeSlot, { nullable: false })
+  @JoinColumn({ name: 'time_slot_id' })
+  timeSlot: TimeSlot;
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Created })
   status: OrderStatus;

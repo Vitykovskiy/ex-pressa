@@ -7,6 +7,9 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { Cart } from '../cart/cart.entity';
 import { ProductPrice } from '../catalog/entities/product-price.entity';
+import { TimeSlot } from './time-slot.entity';
+import { TimeSlotService } from './time-slot.service';
+import { TimeSlotController } from './time-slot.controller';
 
 @Module({
   imports: [
@@ -16,10 +19,11 @@ import { ProductPrice } from '../catalog/entities/product-price.entity';
       OrderItemAddon,
       Cart,
       ProductPrice,
+      TimeSlot,
     ]),
   ],
-  providers: [OrdersService],
-  controllers: [OrdersController],
+  providers: [OrdersService, TimeSlotService],
+  controllers: [OrdersController, TimeSlotController],
   exports: [OrdersService],
 })
 export class OrdersModule {}

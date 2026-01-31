@@ -14,17 +14,7 @@ import { CartItemAddon } from '../cart/cart-item-addon.entity';
 import { ProductPrice } from '../catalog/entities/product-price.entity';
 import { OrderStatus } from './order-status.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
-
-const SLOT_MINUTES = 10;
-
-function addMinutesToTime(time: string, minutesToAdd: number): string {
-  const [hh, mm, ss] = time.split(':').map((v) => Number(v));
-  const totalMinutes = hh * 60 + mm + Math.floor(minutesToAdd);
-  const normalized = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
-  const outH = String(Math.floor(normalized / 60)).padStart(2, '0');
-  const outM = String(normalized % 60).padStart(2, '0');
-  return `${outH}:${outM}`;
-}
+import { TimeSlot } from './time-slot.entity';
 
 @Injectable()
 export class OrdersService {
@@ -39,6 +29,8 @@ export class OrdersService {
     private readonly carts: Repository<Cart>,
     @InjectRepository(ProductPrice)
     private readonly prices: Repository<ProductPrice>,
+    @InjectRepository(TimeSlot)
+    private readonly timeSlots: Repository<TimeSlot>,
   ) {}
 
   async createFromCart(userId: number, dto: CreateOrderDto): Promise<Order> {
@@ -52,6 +44,11 @@ export class OrdersService {
 
     if (!cart) throw new NotFoundException('Корзина не найдена');
     if (!cart.items?.length) throw new BadRequestException('Корзина пуста');
+
+    const slot = await this.timeSlots.findOne({
+      where: { id: dto.timeSlotId, isActive: true },
+    });
+    if (!slot) throw new NotFoundException('Слот не найден');
 
     let totalRub = 0;
     const items: OrderItem[] = [];
@@ -120,9 +117,10 @@ export class OrdersService {
 
     const order = this.orders.create({
       user: cart.user,
+      timeSlot: slot,
       status: OrderStatus.Created,
-      slotTimeFrom: dto.slotTimeFrom,
-      slotTimeTo: addMinutesToTime(dto.slotTimeFrom, SLOT_MINUTES),
+      slotTimeFrom: slot.timeFrom,
+      slotTimeTo: slot.timeTo,
       totalRub,
       items,
     });

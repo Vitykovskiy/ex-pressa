@@ -15,7 +15,7 @@ import { CreateAddonGroupDto } from './dto/create-addon-group.dto';
 import { CreateAddonDto } from './dto/create-addon.dto';
 import { LinkAddonGroupDto } from './dto/link-addon-group.dto';
 
-@ApiTags('catalog')
+@ApiTags('Каталог')
 @Controller('catalog')
 export class CatalogController {
   constructor(private readonly catalog: CatalogService) {}

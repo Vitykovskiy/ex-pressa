@@ -38,7 +38,6 @@ export class CartItem {
   @Column({ name: 'quantity', type: 'integer' })
   quantity: number;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @OneToMany(() => CartItemAddon, 'cartItem', {
     cascade: true,
   })

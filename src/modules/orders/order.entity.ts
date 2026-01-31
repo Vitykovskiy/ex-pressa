@@ -3,12 +3,14 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { OrderStatus } from './order-status.enum';
+import { OrderItem } from './order-item.entity';
 
 @Entity('orders')
 export class Order {
@@ -48,4 +50,7 @@ export class Order {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
+  items: OrderItem[];
 }

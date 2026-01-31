@@ -1,14 +1,6 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Menu } from './menu.entity';
-
-export type MenuItemType =
-  | 'drinks_group'
-  | 'options_group'
-  | 'other_group'
-  | 'drink'
-  | 'option'
-  | 'other'
-  | null;
+import { MenuItemType } from '../services/types';
 
 @Entity('menu_items')
 export class MenuItem {
@@ -27,7 +19,7 @@ export class MenuItem {
   parentKey: string | null;
 
   @Column({ name: 'type', type: 'varchar', length: 16, nullable: true })
-  type: MenuItemType;
+  type: MenuItemType | null;
 
   @Column({
     name: 'options_group_key',

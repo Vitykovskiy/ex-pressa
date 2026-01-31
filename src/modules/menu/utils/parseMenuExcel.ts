@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx';
+import { MenuItemType } from '../services/types';
 
 export interface ParsedMenuRow {
   id: number; // порядковый номер строки результата (1..N)
   key: string | null; // key из upload_base (только у заголовков групп/опций)
   parentKey: string | null; // key родителя (drinks_group / other_group / options_group)
-  type: string | null; // 'drinks_group' | 'other_group' | 'options_group' | 'drink' | 'other' | 'option' | null
+  type: MenuItemType | null; // тип позиции/группы
   optionsGroupKey: string | null; // options_group_key для позиций/товаров
   name: string | null;
   size: 's' | 'm' | 'l' | null;
@@ -81,7 +82,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
         pushRow({
           key,
           parentKey: null,
-          type: 'options_group',
+          type: MenuItemType.OptionsGroup,
           optionsGroupKey: null,
           name: groupName,
           size: null,
@@ -96,7 +97,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
         pushRow({
           key,
           parentKey: null,
-          type: 'group', // позже превратим в 'drinks_group' или 'other_group'
+          type: MenuItemType.Group, // позже превратим в drinks_group/other_group
           optionsGroupKey: null,
           name: groupName,
           size: null,
@@ -110,7 +111,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
     }
 
     // Пункт опций внутри options_group
-    if (rawType === 'option') {
+    if (rawType === MenuItemType.Option) {
       if (!currentOptionsParentKey) {
         // если нет контекста options_group, просто игнорируем
         continue;
@@ -125,7 +126,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
       pushRow({
         key: null,
         parentKey: currentOptionsParentKey,
-        type: 'option',
+        type: MenuItemType.Option,
         optionsGroupKey: null, // как в result_base
         name,
         size: null,
@@ -138,7 +139,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
     }
 
     // Напитки / прочие позиции внутри текущей группы
-    if (rawType === 'drink') {
+    if (rawType === MenuItemType.Drink) {
       if (!currentGroupKey) continue;
 
       const resolvedOptionsKey =
@@ -153,7 +154,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
         pushRow({
           key: null,
           parentKey: currentGroupKey,
-          type: 'drink',
+          type: MenuItemType.Drink,
           optionsGroupKey: resolvedOptionsKey,
           name,
           size: sizeKey,
@@ -166,7 +167,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
       continue;
     }
 
-    if (rawType === 'other') {
+    if (rawType === MenuItemType.Other) {
       if (!currentGroupKey) continue;
 
       const resolvedOptionsKey =
@@ -182,7 +183,7 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
       pushRow({
         key: null,
         parentKey: currentGroupKey,
-        type: 'other',
+        type: MenuItemType.Other,
         optionsGroupKey: resolvedOptionsKey,
         name,
         size: null,
@@ -197,15 +198,18 @@ export function parseMenuExcel(buffer: Buffer): ParsedMenuRow[] {
     // Остальные типы сейчас игнорируем
   }
 
-  // Пост-обработка: 'group' → 'drinks_group' | 'other_group'
+  // Пост-обработка: group -> drinks_group | other_group
   for (const parsedRow of resultRows) {
-    if (parsedRow.type === 'group' && parsedRow.key) {
+    if (parsedRow.type === MenuItemType.Group && parsedRow.key) {
       const hasDrinkChild = resultRows.some(
         (childRow) =>
-          childRow.parentKey === parsedRow.key && childRow.type === 'drink',
+          childRow.parentKey === parsedRow.key &&
+          childRow.type === MenuItemType.Drink,
       );
 
-      parsedRow.type = hasDrinkChild ? 'drinks_group' : 'other_group';
+      parsedRow.type = hasDrinkChild
+        ? MenuItemType.DrinksGroup
+        : MenuItemType.OtherGroup;
     }
   }
 

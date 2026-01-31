@@ -3,7 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Menu } from '../entities/menu.entity';
 import { MenuItem } from '../entities/menu-item.entity';
-import { AnyGroup, DrinkMenuItem, MenuMenuItem } from './types';
+import {
+  AnyGroup,
+  DrinkMenuItem,
+  MenuMenuItem,
+  isGroupType,
+  MenuItemType,
+} from './types';
 
 @Injectable()
 export class MenuService {
@@ -27,7 +33,7 @@ export class MenuService {
       order: { id: 'DESC' },
     });
 
-    if (!menu) throw new NotFoundException('No active menu');
+    if (!menu) throw new NotFoundException('Активное меню не найдено');
     return menu;
   }
 
@@ -37,18 +43,13 @@ export class MenuService {
     });
 
     const groups = allMenuItems
-      .filter(
-        ({ type }) =>
-          type === 'drinks_group' ||
-          type === 'other_group' ||
-          type === 'options_group',
-      )
+      .filter(({ type }) => isGroupType(type))
       .map((group) => {
         const items = allMenuItems
           .filter(({ parentKey }) => parentKey === group.key)
           .reduce((acc, item) => {
             switch (item.type) {
-              case 'drink':
+              case MenuItemType.Drink: {
                 const existedDrink = acc.find(
                   ({ name }) => item.name === name,
                 ) as DrinkMenuItem;
@@ -62,30 +63,31 @@ export class MenuService {
                   acc.push({
                     id: item.id,
                     name: item.name ?? '',
-                    type: 'drink',
+                    type: MenuItemType.Drink,
                     optionsGroupKey: item.optionsGroupKey,
                     description: item.description,
                     sizes: [{ size: item.size!, price: item.price! }],
                   });
                 }
                 break;
+              }
 
-              case 'other':
+              case MenuItemType.Other:
                 acc.push({
                   id: item.id,
                   name: item.name ?? '',
-                  type: 'other',
+                  type: MenuItemType.Other,
                   optionsGroupKey: item.optionsGroupKey,
                   description: item.description,
                   price: item.price!,
                 });
                 break;
 
-              case 'option':
+              case MenuItemType.Option:
                 acc.push({
                   id: item.id,
                   name: item.name ?? '',
-                  type: 'option',
+                  type: MenuItemType.Option,
                   description: item.description,
                   price: item.price ?? null,
                 });
@@ -114,7 +116,7 @@ export class MenuService {
 
   async findItemById(id: number): Promise<MenuItem> {
     const item = await this.items.findOne({ where: { id } });
-    if (!item) throw new NotFoundException('Menu item not found');
+    if (!item) throw new NotFoundException('Пункт меню не найден');
     return item;
   }
 
@@ -123,7 +125,7 @@ export class MenuService {
       where: { id },
       relations: ['items'],
     });
-    if (!menu) throw new NotFoundException('Menu not found');
+    if (!menu) throw new NotFoundException('Меню не найдено');
     return menu;
   }
 

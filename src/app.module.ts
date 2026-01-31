@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { UsersModule } from './modules/users/users.module';
-import { MenuModule } from './modules/menu/menu.module';
 
 @Module({
   imports: [
@@ -35,7 +34,6 @@ import { MenuModule } from './modules/menu/menu.module';
       },
     }),
     UsersModule,
-    MenuModule,
   ],
 })
 export class AppModule {}

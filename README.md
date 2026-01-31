@@ -31,6 +31,12 @@ docker compose -f docker-compose.dev.yaml --env-file .env.dev up -d
 npm run start:dev
 ```
 
+## Swagger
+
+После запуска приложения Swagger доступен по адресу:
+
+- `http://localhost:<PORT>/docs` (`PORT` в `.env`)
+
 ## Запуск (prod)
 
 1. Создать `.env.prod` на сервере

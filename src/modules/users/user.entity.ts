@@ -5,11 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Role } from './roles/role.entity';
 
-@Entity('customers')
+@Entity('users')
 @Index(['tgId'], { unique: true, where: 'tg_id IS NOT NULL' })
-export class Customer {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,4 +33,8 @@ export class Customer {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable({ name: 'user_roles' })
+  roles: Role[];
 }

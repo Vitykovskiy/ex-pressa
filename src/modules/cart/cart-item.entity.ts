@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Cart } from './cart.entity';
 import { Product } from '../catalog/entities/product.entity';
-import { DrinkSize } from '../catalog/entities/drink-size.entity';
+import { DrinkSizeCode } from '../catalog/enums/drink-size-code.enum';
 import { CartItemAddon } from './cart-item-addon.entity';
 
 @Entity('cart_items')
@@ -24,9 +24,13 @@ export class CartItem {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => DrinkSize, { nullable: true })
-  @JoinColumn({ name: 'size_id' })
-  size?: DrinkSize | null;
+  @Column({
+    name: 'size_code',
+    type: 'enum',
+    enum: DrinkSizeCode,
+    nullable: true,
+  })
+  sizeCode?: DrinkSizeCode | null;
 
   @Column({ name: 'product_name', type: 'text' })
   productName: string;

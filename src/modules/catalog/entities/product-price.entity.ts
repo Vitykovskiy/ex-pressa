@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
-import { DrinkSize } from './drink-size.entity';
+import { DrinkSizeCode } from '../enums/drink-size-code.enum';
 
 @Entity('product_prices')
 export class ProductPrice {
@@ -17,9 +17,13 @@ export class ProductPrice {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => DrinkSize, (size) => size.prices, { nullable: true })
-  @JoinColumn({ name: 'size_id' })
-  size?: DrinkSize | null;
+  @Column({
+    name: 'size_code',
+    type: 'enum',
+    enum: DrinkSizeCode,
+    nullable: true,
+  })
+  sizeCode?: DrinkSizeCode | null;
 
   @Column({ name: 'price_rub', type: 'integer', nullable: true })
   priceRub?: number | null;

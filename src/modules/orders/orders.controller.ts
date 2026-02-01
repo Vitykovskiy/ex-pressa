@@ -1,5 +1,5 @@
 import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { Order } from './order.entity';
@@ -11,6 +11,7 @@ export class OrdersController {
 
   @Post('from-cart/:userId')
   @ApiOperation({ summary: 'Создать заказ из корзины пользователя' })
+  @ApiOkResponse({ type: Order })
   createFromCart(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateOrderDto,

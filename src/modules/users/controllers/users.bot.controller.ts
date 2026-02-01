@@ -10,7 +10,7 @@ function getFrom(ctx: Context) {
     name:
       [from?.first_name, from?.last_name].filter(Boolean).join(' ') ||
       from?.username ||
-      'User',
+      'Пользователь',
   };
 }
 

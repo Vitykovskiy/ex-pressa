@@ -85,7 +85,7 @@ export class CartService {
     return this.getCartByUserId(userId);
   }
 
-  async updateItemQuantity(itemId: string, quantity: number): Promise<Cart> {
+  async updateItemQuantity(itemId: number, quantity: number): Promise<Cart> {
     const item = await this.items.findOne({
       where: { id: itemId },
       relations: { cart: { user: true } },
@@ -97,7 +97,7 @@ export class CartService {
     return this.getCartByUserId(item.cart.user.id);
   }
 
-  async removeItem(itemId: string): Promise<Cart> {
+  async removeItem(itemId: number): Promise<Cart> {
     const item = await this.items.findOne({
       where: { id: itemId },
       relations: { cart: { user: true } },

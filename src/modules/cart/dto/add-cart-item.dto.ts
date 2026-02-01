@@ -1,32 +1,36 @@
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsUUID,
-  ValidateNested,
-} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsInt, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { DrinkSizeCode } from '../../catalog/enums/drink-size-code.enum';
 
 export class AddCartItemAddonDto {
-  @IsUUID()
-  addonId: string;
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  addonId: number;
 
+  @ApiProperty({ example: 1 })
   @IsInt()
   quantity: number;
 }
 
 export class AddCartItemDto {
-  @IsUUID()
-  productId: string;
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  productId: number;
 
+  @ApiPropertyOptional({ enum: DrinkSizeCode, example: 'M' })
   @IsOptional()
   @IsEnum(DrinkSizeCode)
   sizeCode?: DrinkSizeCode | null;
 
+  @ApiProperty({ example: 2 })
   @IsInt()
   quantity: number;
 
+  @ApiPropertyOptional({
+    type: [AddCartItemAddonDto],
+    example: [{ addonId: 3, quantity: 1 }],
+  })
   @IsOptional()
   @ValidateNested({ each: true })
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call

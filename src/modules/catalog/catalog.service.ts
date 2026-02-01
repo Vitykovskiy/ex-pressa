@@ -39,7 +39,7 @@ export class CatalogService {
   }
 
   async createProduct(data: {
-    groupId: string;
+    groupId: number;
     name: string;
     description?: string;
     type: Product['type'];
@@ -65,7 +65,7 @@ export class CatalogService {
   }
 
   async createProductPrice(data: {
-    productId: string;
+    productId: number;
     sizeCode?: ProductPrice['sizeCode'] | null;
     priceRub?: number | null;
     isActive?: boolean;
@@ -98,7 +98,7 @@ export class CatalogService {
   }
 
   async createAddon(data: {
-    addonGroupId: string;
+    addonGroupId: number;
     name: string;
     priceRub?: number;
     isActive?: boolean;
@@ -118,8 +118,8 @@ export class CatalogService {
   }
 
   async linkAddonGroupToProductGroup(data: {
-    productGroupId: string;
-    addonGroupId: string;
+    productGroupId: number;
+    addonGroupId: number;
   }): Promise<ProductGroupAddonGroup> {
     const productGroup = await this.productGroups.findOne({
       where: { id: data.productGroupId },
@@ -154,7 +154,7 @@ export class CatalogService {
     });
   }
 
-  async getProductById(id: string): Promise<Product> {
+  async getProductById(id: number): Promise<Product> {
     const product = await this.products.findOne({
       where: { id },
       relations: { group: true, prices: true },

@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TimeSlotService } from './time-slot.service';
 import { TimeSlot } from './time-slot.entity';
 
@@ -10,6 +10,7 @@ export class TimeSlotController {
 
   @Get('active')
   @ApiOperation({ summary: 'Получить активные слоты' })
+  @ApiOkResponse({ type: TimeSlot, isArray: true })
   getActive(): Promise<TimeSlot[]> {
     return this.slots.getActiveSlots();
   }

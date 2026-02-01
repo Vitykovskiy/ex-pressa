@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsInt,
@@ -7,17 +8,21 @@ import {
 } from 'class-validator';
 
 export class CreateAddonDto {
-  @IsString()
-  addonGroupId: string;
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  addonGroupId: number;
 
+  @ApiProperty({ example: 'Сироп ваниль' })
   @IsString()
   @Length(1, 120)
   name: string;
 
+  @ApiPropertyOptional({ example: 30 })
   @IsOptional()
   @IsInt()
   priceRub?: number;
 
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

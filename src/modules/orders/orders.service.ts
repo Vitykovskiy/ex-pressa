@@ -14,6 +14,7 @@ import { CartItemAddon } from '../cart/cart-item-addon.entity';
 import { ProductPrice } from '../catalog/entities/product-price.entity';
 import { OrderStatus } from './order-status.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrdersFilterDto } from './dto/orders-filter.dto';
 import { TimeSlot } from './time-slot.entity';
 
 @Injectable()
@@ -131,5 +132,50 @@ export class OrdersService {
     await this.carts.remove(cart);
 
     return saved;
+  }
+
+  async getHistoryByUserId(userId: number): Promise<Order[]> {
+    return this.orders.find({
+      where: { user: { id: userId } },
+      relations: {
+        user: true,
+        timeSlot: true,
+        items: { addons: true },
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getOrdersForBarista(filters: OrdersFilterDto): Promise<Order[]> {
+    const qb = this.orders
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.timeSlot', 'timeSlot')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.addons', 'addons')
+      .orderBy('order.createdAt', 'DESC');
+
+    const statuses = Array.isArray(filters.status)
+      ? filters.status
+      : filters.status
+        ? [filters.status]
+        : [];
+
+    if (statuses.length) {
+      qb.andWhere('order.status IN (:...statuses)', { statuses });
+    }
+
+    if (filters.dateFrom) {
+      qb.andWhere('order.createdAt >= :dateFrom', {
+        dateFrom: filters.dateFrom,
+      });
+    }
+    if (filters.dateTo) {
+      qb.andWhere('order.createdAt <= :dateTo', {
+        dateTo: filters.dateTo,
+      });
+    }
+
+    return qb.getMany();
   }
 }

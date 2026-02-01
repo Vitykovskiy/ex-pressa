@@ -1,7 +1,23 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrdersFilterDto } from './dto/orders-filter.dto';
 import { Order } from './order.entity';
 
 @ApiTags('Заказы')
@@ -17,5 +33,31 @@ export class OrdersController {
     @Body() dto: CreateOrderDto,
   ): Promise<Order> {
     return this.orders.createFromCart(userId, dto);
+  }
+
+  @Get('history')
+  @ApiOperation({ summary: 'Получить историю заказов пользователя' })
+  @ApiHeader({
+    name: 'x-user-id',
+    required: true,
+    description: 'Идентификатор текущего пользователя',
+  })
+  @ApiOkResponse({ type: Order, isArray: true })
+  getHistory(@Headers('x-user-id') userIdRaw: string): Promise<Order[]> {
+    const userId = Number(userIdRaw);
+    if (!Number.isInteger(userId)) {
+      throw new BadRequestException('Некорректный x-user-id');
+    }
+    return this.orders.getHistoryByUserId(userId);
+  }
+
+  @Post('search')
+  @ApiOperation({
+    summary: 'Получить все заказы с фильтрами по статусу и дате',
+  })
+  @ApiOkResponse({ type: Order, isArray: true })
+  @ApiBody({ type: OrdersFilterDto })
+  getAll(@Body() filters: OrdersFilterDto): Promise<Order[]> {
+    return this.orders.getOrdersForBarista(filters);
   }
 }

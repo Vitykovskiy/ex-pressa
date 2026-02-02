@@ -4,10 +4,10 @@ import { Repository } from 'typeorm';
 import { Cart } from './cart.entity';
 import { CartItem } from './cart-item.entity';
 import { CartItemAddon } from './cart-item-addon.entity';
-import { User } from '../users/user.entity';
-import { Product } from '../catalog/entities/product.entity';
-import { Addon } from '../catalog/entities/addon.entity';
+import { User } from '@modules/users';
+
 import { AddCartItemDto } from './dto/add-cart-item.dto';
+import { Product, Addon } from '@modules/catalog';
 
 @Injectable()
 export class CartService {

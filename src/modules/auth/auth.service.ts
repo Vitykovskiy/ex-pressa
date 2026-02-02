@@ -5,9 +5,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
-import { UsersService } from '../users/users.service';
+import { User, UsersService } from '@modules/users';
 import { verifyTelegramInitData } from './helpers';
-import { User } from '../users/user.entity';
 import { SessionPayload } from './types';
 
 @Injectable()

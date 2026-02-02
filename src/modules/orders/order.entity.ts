@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from '../users/user.entity';
+import { User } from '@modules/users';
 import { OrderStatus } from './order-status.enum';
 import { OrderItem } from './order-item.entity';
 import { TimeSlot } from './time-slot.entity';

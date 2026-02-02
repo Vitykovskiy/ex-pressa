@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../users/user.entity';
+import { User } from '@modules/users';
 import { CartItem } from './cart-item.entity';
 
 @Entity('carts')

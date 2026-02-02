@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/user.entity';
+import { User, UsersService } from '@modules/users';
 import { AuthService } from './auth.service';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { isSessionPayload } from './types';

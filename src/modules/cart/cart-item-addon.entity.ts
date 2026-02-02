@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { CartItem } from './cart-item.entity';
-import { Addon } from '../catalog/entities/addon.entity';
+import { Addon } from '@modules/catalog';
 
 @Entity('cart_item_addons')
 export class CartItemAddon {

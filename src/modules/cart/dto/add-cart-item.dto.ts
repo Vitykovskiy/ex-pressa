@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { DrinkSizeCode } from '../../catalog/enums/drink-size-code.enum';
+import { DrinkSizeCode } from '@modules/catalog';
 
 export class AddCartItemAddonDto {
   @ApiProperty({ example: 1 })

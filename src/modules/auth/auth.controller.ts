@@ -9,7 +9,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import type { User } from '../users/user.entity';
+import type { User } from '@modules/users';
 import { Public } from './public.decorator';
 
 @ApiTags('Авторизация')

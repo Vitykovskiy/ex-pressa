@@ -8,8 +8,7 @@ import {
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Cart } from './cart.entity';
-import { Product } from '../catalog/entities/product.entity';
-import { DrinkSizeCode } from '../catalog/enums/drink-size-code.enum';
+import { DrinkSizeCode, Product } from '@modules/catalog';
 import { CartItemAddon } from './cart-item-addon.entity';
 
 @Entity('cart_items')

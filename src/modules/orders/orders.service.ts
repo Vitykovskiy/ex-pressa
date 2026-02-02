@@ -8,14 +8,12 @@ import { Repository } from 'typeorm';
 import { Order } from './order.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderItemAddon } from './order-item-addon.entity';
-import { Cart } from '../cart/cart.entity';
-import { CartItem } from '../cart/cart-item.entity';
-import { CartItemAddon } from '../cart/cart-item-addon.entity';
-import { ProductPrice } from '../catalog/entities/product-price.entity';
 import { OrderStatus } from './order-status.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersFilterDto } from './dto/orders-filter.dto';
 import { TimeSlot } from './time-slot.entity';
+import { Cart, CartItem, CartItemAddon } from '@modules/cart';
+import { ProductPrice } from '@modules/catalog';
 
 @Injectable()
 export class OrdersService {

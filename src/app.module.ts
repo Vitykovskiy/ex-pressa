@@ -3,12 +3,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegrafModule } from 'nestjs-telegraf';
-import { UsersModule } from './modules/users/users.module';
-import { CatalogModule } from './modules/catalog/catalog.module';
-import { CartModule } from './modules/cart/cart.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { AuthGuard } from './modules/auth/auth.guard';
+import { AuthModule, AuthGuard } from '@modules/auth';
+import { CartModule } from '@modules/cart';
+import { CatalogModule } from '@modules/catalog';
+import { OrdersModule } from '@modules/orders';
+import { UsersModule } from '@modules/users';
 
 @Module({
   imports: [

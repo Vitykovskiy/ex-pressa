@@ -45,12 +45,10 @@ export class CartItem {
   @ApiProperty({ example: 2 })
   quantity: number;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   @OneToMany(() => CartItemAddon, 'cartItem', {
     cascade: true,
   })
   @ApiProperty({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     type: () => [CartItemAddon],
     example: [{ id: 1, addonName: 'Ванильный сироп', quantity: 1 }],
   })

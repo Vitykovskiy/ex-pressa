@@ -87,7 +87,6 @@ export class OrdersService {
 
       totalRub += lineTotal;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const cartAddons: CartItemAddon[] = cartItem.addons ?? [];
       if (cartAddons.length) {
         const addons: OrderItemAddon[] = [];

@@ -33,7 +33,6 @@ export class AddCartItemDto {
   })
   @IsOptional()
   @ValidateNested({ each: true })
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @Type(() => AddCartItemAddonDto)
   addons?: AddCartItemAddonDto[];
 }

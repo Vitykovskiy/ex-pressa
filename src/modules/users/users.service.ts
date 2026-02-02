@@ -24,9 +24,17 @@ export class UsersService {
     return this.repo.findOne({ where: { tgId } });
   }
 
+  async findById(id: number): Promise<User | null> {
+    return this.repo.findOne({ where: { id } });
+  }
+
   async createOrFindByTgId(dto: CreateUserDto): Promise<User> {
-    const existing = await this.findByTgId(dto.tgId!);
-    if (existing) return existing;
+    const user = await this.findByTgId(dto.tgId!);
+
+    if (user) {
+      return user;
+    }
+
     return this.create(dto);
   }
 }

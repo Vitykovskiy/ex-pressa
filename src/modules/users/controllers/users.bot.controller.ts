@@ -1,6 +1,7 @@
 import { Update, Start, Ctx } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../users.service';
+import { WEB_APP_URL } from 'src/main';
 
 function getFrom(ctx: Context) {
   const from = ctx.message?.from || ctx.callbackQuery?.from || ctx.from;
@@ -29,9 +30,9 @@ export class UsersBotController {
 
     await ctx.reply(
       `Здравствуйте, ${user.name}`,
-      Markup.keyboard([['/menu']])
-        .resize()
-        .oneTime(),
+      Markup.inlineKeyboard([
+        [Markup.button.webApp('Открыть меню', WEB_APP_URL)],
+      ]),
     );
   }
 }

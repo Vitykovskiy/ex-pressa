@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TelegrafModule } from 'nestjs-telegraf';
@@ -6,6 +7,8 @@ import { UsersModule } from './modules/users/users.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AuthGuard } from './modules/auth/auth.guard';
 
 @Module({
   imports: [
@@ -37,9 +40,16 @@ import { OrdersModule } from './modules/orders/orders.module';
       },
     }),
     UsersModule,
+    AuthModule,
     CatalogModule,
     CartModule,
     OrdersModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

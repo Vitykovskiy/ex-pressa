@@ -7,11 +7,11 @@ export function verifyTelegramInitData(
   maxAgeSeconds = 60 * 60,
 ): TelegramInitDataVerifyResult {
   if (!initData) {
-    return { ok: false, error: 'initData is empty' };
+    return { ok: false, error: 'initData пустой' };
   }
 
   if (!botToken) {
-    return { ok: false, error: 'botToken is empty' };
+    return { ok: false, error: 'botToken пустой' };
   }
 
   try {
@@ -23,7 +23,7 @@ export function verifyTelegramInitData(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : 'initData is invalid',
+      error: error instanceof Error ? error.message : 'initData некорректный',
     };
   }
 }

@@ -39,7 +39,7 @@ export class AuthController {
     const initData = this.getInitDataFromAuthHeader(authHeader);
 
     if (!initData) {
-      throw new UnauthorizedException('Authorization header missing');
+      throw new UnauthorizedException('Отсутствует заголовок Authorization');
     }
 
     const user = await this.auth.authTelegram(initData);

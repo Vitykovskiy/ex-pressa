@@ -29,6 +29,12 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
+    const type = context.getType<string>();
+
+    if (type !== 'http') {
+      throw new UnauthorizedException('Контекст не поддерживает авторизацию');
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
     const token = request.cookies?.session as string | undefined;
     if (!token) {

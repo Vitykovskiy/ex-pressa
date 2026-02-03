@@ -2,6 +2,7 @@ import { Update, Start, Ctx } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../users.service';
 import { WEB_APP_URL } from 'src/main';
+import { Public } from '@modules/auth/public.decorator';
 
 function getFrom(ctx: Context) {
   const from = ctx.message?.from || ctx.callbackQuery?.from || ctx.from;
@@ -15,6 +16,7 @@ function getFrom(ctx: Context) {
   };
 }
 
+@Public()
 @Update()
 export class UsersBotController {
   constructor(private readonly users: UsersService) {}

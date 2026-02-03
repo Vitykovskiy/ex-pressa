@@ -20,9 +20,33 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            set -euo pipefail
+
+            # 1) update code
             cd ~/deploy/back
             git fetch origin
             git checkout deploy
             git reset --hard origin/deploy
-            cd ~/deploy
-            docker-compose up -d --build back
+
+            # 2) write .env.prod (defaults + secrets)
+            cat > ~/deploy/back/.env.prod <<'EOF'
+            DB_TYPE=postgres
+            DB_HOST=postgres
+            EOF
+
+            cat >> ~/deploy/back/.env.prod <<EOF
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+            AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASS }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            PORT=${{ secrets.PORT }}
+            WEB_APP_URL=${{ secrets.WEB_APP_URL }}
+            EOF
+
+            chmod 600 ~/deploy/back/.env.prod
+
+            # 3) deploy (build happens inside Docker)
+            cd ~/deploy/back
+            docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d --build

@@ -57,7 +57,6 @@ docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d
 
 - `TELEGRAM_BOT_TOKEN` — токен бота
 - `AUTH_JWT_SECRET` - ключ для верификации JWT
-- `SKIP_AUTH` - для отключения проверки авторизации значение `true` (только для разработки и тестирования),
 - `DB_HOST` — хост PostgreSQL (dev: `localhost`, prod: `postgres`)
 - `DB_PORT` — порт PostgreSQL (обычно `5432`)
 - `DB_USER` — пользователь БД

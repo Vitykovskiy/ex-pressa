@@ -1,11 +1,11 @@
 # ex-pressa
 
-Телеграм-бот на NestJS. База данных — PostgreSQL (в dev поднимается через Docker).
+Телеграм-бот на NestJS. База данных — PostgreSQL
 
 ## Требования
 
 - Node.js 20+
-- Docker (для dev базы)
+- Docker
 
 ## Установка
 
@@ -20,7 +20,7 @@ npm install
 - `.env.dev` — для dev (сервис локально, БД в Docker)
 - `.env.prod` — для prod (все в Docker)
 
-Открой нужный файл и заполни значения (минимум `TELEGRAM_BOT_TOKEN`).
+В нужном файле необходимо указать значения переменных
 
 ## Запуск (dev)
 
@@ -56,6 +56,8 @@ docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d
 ## Переменные окружения
 
 - `TELEGRAM_BOT_TOKEN` — токен бота
+- `AUTH_JWT_SECRET` - ключ для верификации JWT
+- `SKIP_AUTH` - для отключения проверки авторизации значение `true` (только для разработки и тестирования),
 - `DB_HOST` — хост PostgreSQL (dev: `localhost`, prod: `postgres`)
 - `DB_PORT` — порт PostgreSQL (обычно `5432`)
 - `DB_USER` — пользователь БД

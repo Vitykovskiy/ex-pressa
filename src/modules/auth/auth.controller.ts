@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -6,10 +6,15 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import type { User } from '@modules/users';
+import { User } from '@modules/users';
 import { Public } from './public.decorator';
 
 @ApiTags('Авторизация')
@@ -19,12 +24,31 @@ export class AuthController {
 
   @Get('me')
   @ApiOperation({ summary: 'Текущий пользователь' })
+  @ApiCookieAuth('session')
+  @ApiOkResponse({ type: User })
   me(@Req() req: Request): User {
     return (req as Request & { user: User }).user;
   }
 
   @Post('telegram')
   @ApiOperation({ summary: 'Авторизация через Telegram' })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        ok: true,
+        user: {
+          id: 7,
+          name: 'Alex Ivanov',
+          tgId: '123456789',
+          tgUsername: 'alex',
+          isActive: true,
+          createdAt: '2026-02-01T08:00:00.000Z',
+          updatedAt: '2026-02-01T08:10:00.000Z',
+          roles: [{ id: 1, code: 'USER', name: 'User' }],
+        },
+      },
+    },
+  })
   @Public()
   async telegram(
     @Req() req: Request,

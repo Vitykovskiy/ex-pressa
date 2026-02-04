@@ -9,11 +9,13 @@ import { CatalogModule } from '@modules/catalog';
 import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
 
+const envFile = () => process.env.ENV_FILE ?? '.env.dev';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.ENV_FILE ?? '.env.dev',
+      envFilePath: envFile(),
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -33,7 +35,7 @@ import { UsersModule } from '@modules/users';
       useFactory: (config: ConfigService) => {
         const token = config.get<string>('TELEGRAM_BOT_TOKEN', '');
         if (!token) {
-          throw new Error('TELEGRAM_BOT_TOKEN отсутствует в .env');
+          throw new Error(`TELEGRAM_BOT_TOKEN отсутствует в ${envFile()}`);
         }
         return { token };
       },

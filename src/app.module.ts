@@ -9,23 +9,20 @@ import { CatalogModule } from '@modules/catalog';
 import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
 
-const envFile = () => process.env.ENV_FILE ?? '.env.dev';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: envFile(),
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: config.get<'postgres'>('DB_TYPE', 'postgres'),
+        type: 'postgres',
         host: config.get<string>('DB_HOST', 'localhost'),
         port: Number(config.get<string>('DB_PORT', '5432')),
         username: config.get<string>('DB_USER', 'postgres'),
         password: config.get<string>('DB_PASS', 'postgres'),
-        database: config.get<string>('DB_NAME', 'ex_pressa'),
+        database: config.get<string>('DB_NAME', 'ex-pressa'),
         autoLoadEntities: true,
         synchronize: true,
       }),
@@ -35,7 +32,7 @@ const envFile = () => process.env.ENV_FILE ?? '.env.dev';
       useFactory: (config: ConfigService) => {
         const token = config.get<string>('TELEGRAM_BOT_TOKEN', '');
         if (!token) {
-          throw new Error(`TELEGRAM_BOT_TOKEN отсутствует в ${envFile()}`);
+          throw new Error('TELEGRAM_BOT_TOKEN отсутствует в .env');
         }
         return { token };
       },

@@ -1,13 +1,9 @@
 FROM node:20-alpine
-
+RUN apt update && apt install -y nodejs && apt install -y npm
 WORKDIR /app
 
-# install dependencies
-COPY package*.json ./
-RUN npm ci
-
-# build app
 COPY . .
+RUN npm install
 RUN npm run build
 
 ENV NODE_ENV=production

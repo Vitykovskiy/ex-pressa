@@ -2,11 +2,13 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: ex-pressa-postgres
-    restart: unless-stopped
+    restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - '${DB_PORT}:5432'
     volumes:
@@ -16,6 +18,32 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    networks:
+      - ex-pressa-net
+
+  pgadmin:
+    image: dpage/pgadmin4:9.8
+    ports:
+      - 5050:80
+    environment:
+      # Required by pgAdmin
+      PGADMIN_DEFAULT_EMAIL: demo@example.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+
+      # Don't require the user to login
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+
+      # Don't require a "master" password after logging in
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ex-pressa-net
 
 volumes:
   ex-pressa-pgdata:
+
+networks:
+  ex-pressa-net:
+    driver: bridge

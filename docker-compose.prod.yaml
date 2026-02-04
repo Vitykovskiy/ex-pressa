@@ -2,13 +2,14 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
     container_name: ex-pressa-app
-    restart: unless-stopped
+    restart: always
     env_file:
-      - .env.prod
+      - .env
     environment:
-      ENV_FILE: .env.prod
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     depends_on:
       postgres:
         condition: service_healthy
@@ -18,13 +19,9 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: ex-pressa-postgres
-    restart: unless-stopped
+    restart: always
     env_file:
-      - .env.prod
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      - .env
     volumes:
       - ex-pressa-pgdata:/var/lib/postgresql/data
     healthcheck:

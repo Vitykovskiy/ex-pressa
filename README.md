@@ -15,19 +15,14 @@ npm install
 
 ## Настройка окружения
 
-Используются два файла окружения:
-
-- `.env.dev` — для dev (сервис локально, БД в Docker)
-- `.env.prod` — для prod (все в Docker)
-
-В нужном файле необходимо указать значения переменных
+Используется файл окружения `.env`
 
 ## Запуск (dev)
 
 База PostgreSQL в Docker, приложение локально:
 
 ```bash
-docker compose -f docker-compose.dev.yaml --env-file .env.dev up -d
+docker compose -f docker-compose.dev.yaml up -d
 npm run start:dev
 ```
 
@@ -39,7 +34,7 @@ npm run start:dev
 
 ## Запуск (prod)
 
-1. Создать `.env.prod` на сервере
+1. Создать `.env` на сервере
 2. Установить зависимости и собрать проект:
 
 ```bash
@@ -50,14 +45,13 @@ npm run build
 3. Запуск:
 
 ```bash
-docker compose -f docker-compose.prod.yaml --env-file .env.prod up -d
+docker compose -f docker-compose.prod.yaml up -d
 ```
 
 ## Переменные окружения
 
 - `TELEGRAM_BOT_TOKEN` — токен бота
 - `AUTH_JWT_SECRET` - ключ для верификации JWT
-- `SKIP_AUTH` - для отключения проверки авторизации значение `true` (только для разработки и тестирования),
 - `DB_HOST` — хост PostgreSQL (dev: `localhost`, prod: `postgres`)
 - `DB_PORT` — порт PostgreSQL (обычно `5432`)
 - `DB_USER` — пользователь БД

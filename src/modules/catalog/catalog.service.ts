@@ -154,6 +154,18 @@ export class CatalogService {
     });
   }
 
+  async getAddonGroups(): Promise<AddonGroup[]> {
+    return this.addonGroups.find({
+      relations: {
+        addons: true,
+      },
+      order: {
+        sortOrder: 'ASC',
+        addons: { name: 'ASC' },
+      },
+    });
+  }
+
   async getProductById(id: number): Promise<Product> {
     const product = await this.products.findOne({
       where: { id },

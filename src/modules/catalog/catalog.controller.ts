@@ -72,6 +72,13 @@ export class CatalogController {
     return this.catalog.createAddonGroup(dto);
   }
 
+  @Get('addon-groups')
+  @ApiOperation({ summary: 'Получить группы допов' })
+  @ApiOkResponse({ type: AddonGroup, isArray: true })
+  getAddonGroups(): Promise<AddonGroup[]> {
+    return this.catalog.getAddonGroups();
+  }
+
   @Post('addons')
   @ApiOperation({ summary: 'Создать доп' })
   @ApiOkResponse({ type: Addon })

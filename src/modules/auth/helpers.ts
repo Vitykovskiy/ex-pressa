@@ -1,6 +1,14 @@
 import { parse, validate } from '@tma.js/init-data-node';
 import type { TelegramInitDataVerifyResult } from './types';
 
+export function parseBoolean(value?: string | null): boolean {
+  if (!value) {
+    return false;
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase().trim());
+}
+
 export function verifyTelegramInitData(
   initData: string,
   botToken: string,

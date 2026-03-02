@@ -4,22 +4,33 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { User, UsersService } from '@modules/users';
 import { AuthService } from './auth.service';
+import { parseBoolean } from './helpers';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { isSessionPayload } from './types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private readonly skipAuth: boolean;
+
   constructor(
     private readonly reflector: Reflector,
+    private readonly config: ConfigService,
     private readonly auth: AuthService,
     private readonly users: UsersService,
-  ) {}
+  ) {
+    this.skipAuth = parseBoolean(this.config.get<string>('SKIP_AUTH', 'false'));
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (this.skipAuth) {
+      return true;
+    }
+
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

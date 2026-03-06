@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CartService } from './cart.service';
@@ -19,21 +20,21 @@ import { Cart } from './cart.entity';
 export class CartController {
   constructor(private readonly cart: CartService) {}
 
-  @Get(':userId')
-  @ApiOperation({ summary: 'Получить корзину пользователя' })
+  @Get()
+  @ApiOperation({ summary: 'Получить корзину текущего пользователя' })
   @ApiOkResponse({ type: Cart })
-  getCart(@Param('userId', ParseIntPipe) userId: number) {
-    return this.cart.getCartByUserId(userId);
+  getCart(@Req() req: Request & { user: { id: number } }) {
+    return this.cart.getCartByUserId(req.user.id);
   }
 
-  @Post(':userId/items')
-  @ApiOperation({ summary: 'Добавить позицию в корзину' })
+  @Post('items')
+  @ApiOperation({ summary: 'Добавить позицию в корзину текущего пользователя' })
   @ApiOkResponse({ type: Cart })
   addItem(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req: Request & { user: { id: number } },
     @Body() dto: AddCartItemDto,
   ) {
-    return this.cart.addItem(userId, dto);
+    return this.cart.addItem(req.user.id, dto);
   }
 
   @Patch('items/:itemId')
@@ -53,10 +54,10 @@ export class CartController {
     return this.cart.removeItem(itemId);
   }
 
-  @Delete(':userId')
-  @ApiOperation({ summary: 'Очистить корзину пользователя' })
+  @Delete()
+  @ApiOperation({ summary: 'Очистить корзину текущего пользователя' })
   @ApiOkResponse({ type: Cart })
-  clearCart(@Param('userId', ParseIntPipe) userId: number) {
-    return this.cart.clearCart(userId);
+  clearCart(@Req() req: Request & { user: { id: number } }) {
+    return this.cart.clearCart(req.user.id);
   }
 }

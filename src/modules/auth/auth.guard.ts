@@ -8,10 +8,29 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { User, UsersService } from '@modules/users';
+import { RoleCode } from '@modules/users/roles/role-code.enum';
 import { AuthService } from './auth.service';
 import { parseBoolean } from './helpers';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { isSessionPayload } from './types';
+
+/** Мок-пользователь для режима SKIP_AUTH=true — имеет все роли */
+const DEV_USER: User = Object.assign(new User(), {
+  id: 0,
+  name: 'Dev User',
+  tgId: undefined,
+  tgUsername: undefined,
+  isActive: true,
+  isConfirmed: true,
+  confirmationRequestedAt: undefined,
+  createdAt: new Date(0),
+  updatedAt: new Date(0),
+  roles: [
+    { id: 1, code: RoleCode.USER, name: 'Пользователь', users: [] },
+    { id: 2, code: RoleCode.BARISTA, name: 'Бариста', users: [] },
+    { id: 3, code: RoleCode.ADMIN, name: 'Администратор', users: [] },
+  ],
+});
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -28,6 +47,8 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.skipAuth) {
+      const request = context.switchToHttp().getRequest<Request>();
+      (request as Request & { user: User }).user = DEV_USER;
       return true;
     }
 

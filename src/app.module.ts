@@ -10,11 +10,14 @@ import { CartModule } from '@modules/cart';
 import { CatalogModule } from '@modules/catalog';
 import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
+import { SeedModule } from '@modules/seed/seed.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      // .env.test (если есть) перекрывает значения из .env для тестовой БД
+      envFilePath: ['.env.test', '.env'],
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
@@ -45,6 +48,7 @@ import { UsersModule } from '@modules/users';
     CatalogModule,
     CartModule,
     OrdersModule,
+    SeedModule,
   ],
   providers: [
     {

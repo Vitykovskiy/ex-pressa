@@ -10,6 +10,8 @@ import { ProductPrice } from '@modules/catalog';
 import { TimeSlot } from './time-slot.entity';
 import { TimeSlotService } from './time-slot.service';
 import { TimeSlotController } from './time-slot.controller';
+import { NotificationsService } from './notifications.service';
+import { User } from '@modules/users';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import { TimeSlotController } from './time-slot.controller';
       Cart,
       ProductPrice,
       TimeSlot,
+      User,
     ]),
   ],
-  providers: [OrdersService, TimeSlotService],
+  providers: [OrdersService, TimeSlotService, NotificationsService],
   controllers: [OrdersController, TimeSlotController],
   exports: [OrdersService],
 })

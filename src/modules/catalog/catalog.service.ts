@@ -7,6 +7,11 @@ import { ProductPrice } from './entities/product-price.entity';
 import { AddonGroup } from './entities/addon-group.entity';
 import { Addon } from './entities/addon.entity';
 import { ProductGroupAddonGroup } from './entities/product-group-addon-group.entity';
+import { UpdateProductGroupDto } from './dto/update-product-group.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { UpdateAddonGroupDto } from './dto/update-addon-group.dto';
+import { UpdateAddonDto } from './dto/update-addon.dto';
+import { ReplaceProductPricesDto } from './dto/replace-product-prices.dto';
 
 @Injectable()
 export class CatalogService {
@@ -139,6 +144,107 @@ export class CatalogService {
       addonGroup,
     });
     return this.groupAddonLinks.save(link);
+  }
+
+  async setProductAvailability(
+    id: number,
+    isAvailable: boolean,
+  ): Promise<Product> {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Позиция меню не найдена');
+    product.isAvailable = isAvailable;
+    return this.products.save(product);
+  }
+
+  async updateProductGroup(
+    id: number,
+    dto: UpdateProductGroupDto,
+  ): Promise<ProductGroup> {
+    const group = await this.productGroups.findOne({ where: { id } });
+    if (!group) throw new NotFoundException('Группа продукта не найдена');
+    Object.assign(group, dto);
+    return this.productGroups.save(group);
+  }
+
+  async deleteProductGroup(id: number): Promise<void> {
+    const group = await this.productGroups.findOne({ where: { id } });
+    if (!group) throw new NotFoundException('Группа продукта не найдена');
+    await this.productGroups.remove(group);
+  }
+
+  async updateProduct(id: number, dto: UpdateProductDto): Promise<Product> {
+    const product = await this.products.findOne({
+      where: { id },
+      relations: { group: true },
+    });
+    if (!product) throw new NotFoundException('Позиция меню не найдена');
+
+    if (dto.groupId !== undefined) {
+      const group = await this.productGroups.findOne({
+        where: { id: dto.groupId },
+      });
+      if (!group) throw new NotFoundException('Группа продукта не найдена');
+      product.group = group;
+    }
+
+    const { groupId: _, ...rest } = dto;
+    Object.assign(product, rest);
+    return this.products.save(product);
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Позиция меню не найдена');
+    await this.products.remove(product);
+  }
+
+  async replaceProductPrices(
+    productId: number,
+    dto: ReplaceProductPricesDto,
+  ): Promise<ProductPrice[]> {
+    const product = await this.products.findOne({ where: { id: productId } });
+    if (!product) throw new NotFoundException('Позиция меню не найдена');
+
+    await this.prices.delete({ product: { id: productId } });
+
+    const newPrices = dto.prices.map((p) =>
+      this.prices.create({
+        product,
+        sizeCode: p.sizeCode ?? null,
+        priceRub: p.priceRub ?? null,
+        isActive: p.isActive ?? true,
+      }),
+    );
+    return this.prices.save(newPrices);
+  }
+
+  async updateAddonGroup(
+    id: number,
+    dto: UpdateAddonGroupDto,
+  ): Promise<AddonGroup> {
+    const group = await this.addonGroups.findOne({ where: { id } });
+    if (!group) throw new NotFoundException('Группа аддонов не найдена');
+    Object.assign(group, dto);
+    return this.addonGroups.save(group);
+  }
+
+  async deleteAddonGroup(id: number): Promise<void> {
+    const group = await this.addonGroups.findOne({ where: { id } });
+    if (!group) throw new NotFoundException('Группа аддонов не найдена');
+    await this.addonGroups.remove(group);
+  }
+
+  async updateAddon(id: number, dto: UpdateAddonDto): Promise<Addon> {
+    const addon = await this.addons.findOne({ where: { id } });
+    if (!addon) throw new NotFoundException('Аддон не найден');
+    Object.assign(addon, dto);
+    return this.addons.save(addon);
+  }
+
+  async deleteAddon(id: number): Promise<void> {
+    const addon = await this.addons.findOne({ where: { id } });
+    if (!addon) throw new NotFoundException('Аддон не найден');
+    await this.addons.remove(addon);
   }
 
   async getCatalog(): Promise<ProductGroup[]> {

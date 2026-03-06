@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { AuthModule, AuthGuard } from '@modules/auth';
+import { RolesGuard } from '@modules/auth/roles.guard';
 import { CartModule } from '@modules/cart';
 import { CatalogModule } from '@modules/catalog';
 import { OrdersModule } from '@modules/orders';
@@ -14,6 +16,7 @@ import { UsersModule } from '@modules/users';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -47,6 +50,10 @@ import { UsersModule } from '@modules/users';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

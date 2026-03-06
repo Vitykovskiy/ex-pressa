@@ -36,6 +36,18 @@ export class User {
   @ApiProperty({ example: true })
   isActive: boolean;
 
+  @Column({ name: 'is_confirmed', default: false })
+  @ApiProperty({ example: false })
+  isConfirmed: boolean;
+
+  @Column({
+    name: 'confirmation_requested_at',
+    type: 'timestamptz',
+    nullable: true,
+  })
+  @ApiPropertyOptional({ example: '2026-02-01T09:00:00.000Z' })
+  confirmationRequestedAt?: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   @ApiProperty({ example: '2026-02-01T08:00:00.000Z' })
   createdAt: Date;

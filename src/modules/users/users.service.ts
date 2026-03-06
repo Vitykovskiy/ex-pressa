@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -25,7 +29,7 @@ export class UsersService {
   }
 
   async findById(id: number): Promise<User | null> {
-    return this.repo.findOne({ where: { id } });
+    return this.repo.findOne({ where: { id }, relations: { roles: true } });
   }
 
   async createOrFindByTgId(dto: CreateUserDto): Promise<User> {
@@ -36,5 +40,32 @@ export class UsersService {
     }
 
     return this.create(dto);
+  }
+
+  async requestConfirmation(userId: number): Promise<User> {
+    const user = await this.repo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Пользователь не найден');
+    if (user.isConfirmed)
+      throw new BadRequestException('Аккаунт уже подтверждён');
+
+    user.confirmationRequestedAt = new Date();
+    return this.repo.save(user);
+  }
+
+  async confirmUser(userId: number): Promise<User> {
+    const user = await this.repo.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
+    user.isConfirmed = true;
+    return this.repo.save(user);
+  }
+
+  async getPendingConfirmation(): Promise<User[]> {
+    return this.repo
+      .createQueryBuilder('user')
+      .where('user.confirmationRequestedAt IS NOT NULL')
+      .andWhere('user.isConfirmed = false')
+      .orderBy('user.confirmationRequestedAt', 'ASC')
+      .getMany();
   }
 }

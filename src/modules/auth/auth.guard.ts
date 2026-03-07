@@ -73,7 +73,12 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Сессия не найдена');
     }
 
-    const payload = this.auth.verifyToken(token);
+    let payload: unknown;
+    try {
+      payload = this.auth.verifyToken(token);
+    } catch {
+      throw new UnauthorizedException('Сессия некорректна');
+    }
     if (!isSessionPayload(payload)) {
       throw new UnauthorizedException('Сессия некорректна');
     }

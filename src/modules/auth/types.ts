@@ -14,6 +14,6 @@ export function isSessionPayload(value: unknown): value is SessionPayload {
     !!value &&
     typeof value === 'object' &&
     typeof value['sub'] === 'number' &&
-    (!value['tgId'] || typeof value['tgId'] === 'number')
+    (!value['tgId'] || typeof value['tgId'] === 'string')
   );
 }

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -17,13 +17,7 @@ import { TimeSlot } from './time-slot.entity';
 import { NotificationsService } from './notifications.service';
 import { Cart, CartItem, CartItemAddon } from '@modules/cart';
 import { ProductPrice } from '@modules/catalog';
-
-/** Допустимые переходы статусов */
-const STATUS_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus>> = {
-  [OrderStatus.Created]: OrderStatus.Confirmed,
-  [OrderStatus.Confirmed]: OrderStatus.Ready,
-  [OrderStatus.Ready]: OrderStatus.Closed,
-};
+import { OrderWorkflowService } from './order-workflow.service';
 
 @Injectable()
 export class OrdersService {
@@ -41,6 +35,7 @@ export class OrdersService {
     @InjectRepository(TimeSlot)
     private readonly timeSlots: Repository<TimeSlot>,
     private readonly notifications: NotificationsService,
+    private readonly workflow: OrderWorkflowService,
   ) {}
 
   async createFromCart(userId: number, dto: CreateOrderDto): Promise<Order> {
@@ -52,20 +47,24 @@ export class OrdersService {
       },
     });
 
-    if (!cart) throw new NotFoundException('Корзина не найдена');
+    if (!cart)
+      throw new NotFoundException('РљРѕСЂР·РёРЅР° РЅРµ РЅР°Р№РґРµРЅР°');
     if (!cart.user.isConfirmed) {
       throw new BadRequestException(
-        'Аккаунт не подтверждён. Обратитесь к баристе.',
+        'РђРєРєР°СѓРЅС‚ РЅРµ РїРѕРґС‚РІРµСЂР¶РґС‘РЅ. РћР±СЂР°С‚РёС‚РµСЃСЊ Рє Р±Р°СЂРёСЃС‚Рµ.',
       );
     }
-    if (!cart.items?.length) throw new BadRequestException('Корзина пуста');
+    if (!cart.items?.length)
+      throw new BadRequestException('РљРѕСЂР·РёРЅР° РїСѓСЃС‚Р°');
 
     const slot = await this.timeSlots.findOne({
       where: { id: dto.timeSlotId, isActive: true },
     });
-    if (!slot) throw new NotFoundException('Слот не найден');
+    if (!slot) throw new NotFoundException('РЎР»РѕС‚ РЅРµ РЅР°Р№РґРµРЅ');
     if (slot.bookedCount >= slot.capacity) {
-      throw new BadRequestException('Слот заполнен. Выберите другое время.');
+      throw new BadRequestException(
+        'РЎР»РѕС‚ Р·Р°РїРѕР»РЅРµРЅ. Р’С‹Р±РµСЂРёС‚Рµ РґСЂСѓРіРѕРµ РІСЂРµРјСЏ.',
+      );
     }
 
     let totalRub = 0;
@@ -75,7 +74,9 @@ export class OrdersService {
     for (const cartItem of cartItems) {
       const product = cartItem.product;
       if (!product.isActive || !product.isAvailable) {
-        throw new BadRequestException(`Позиция "${product.name}" недоступна`);
+        throw new BadRequestException(
+          `РџРѕР·РёС†РёСЏ "${product.name}" РЅРµРґРѕСЃС‚СѓРїРЅР°`,
+        );
       }
 
       const price = await this.prices.findOne({
@@ -87,7 +88,7 @@ export class OrdersService {
       });
       if (!price) {
         throw new BadRequestException(
-          `Цена для позиции "${product.name}" не найдена`,
+          `Р¦РµРЅР° РґР»СЏ РїРѕР·РёС†РёРё "${product.name}" РЅРµ РЅР°Р№РґРµРЅР°`,
         );
       }
 
@@ -110,7 +111,9 @@ export class OrdersService {
         for (const cartAddon of cartAddons) {
           const addon = cartAddon.addon;
           if (!addon.isActive) {
-            throw new BadRequestException(`Доп "${addon.name}" недоступен`);
+            throw new BadRequestException(
+              `Р”РѕРї "${addon.name}" РЅРµРґРѕСЃС‚СѓРїРµРЅ`,
+            );
           }
 
           const addonUnit = addon.priceRub ?? 0;
@@ -144,10 +147,10 @@ export class OrdersService {
 
     const saved = await this.orders.save(order);
 
-    // инкремент счётчика занятых мест в слоте
+    // РёРЅРєСЂРµРјРµРЅС‚ СЃС‡С‘С‚С‡РёРєР° Р·Р°РЅСЏС‚С‹С… РјРµСЃС‚ РІ СЃР»РѕС‚Рµ
     await this.timeSlots.increment({ id: slot.id }, 'bookedCount', 1);
 
-    // очистка корзины
+    // РѕС‡РёСЃС‚РєР° РєРѕСЂР·РёРЅС‹
     await this.carts.remove(cart);
 
     return saved;
@@ -169,40 +172,30 @@ export class OrdersService {
     orderId: number,
     dto: UpdateOrderStatusDto,
   ): Promise<Order> {
-    const order = await this.orders.findOne({
-      where: { id: orderId },
-      relations: { timeSlot: true },
-    });
-    if (!order) throw new NotFoundException('Заказ не найден');
-
-    const expected = STATUS_TRANSITIONS[order.status];
+    const order = await this.findOrderForUpdate(orderId);
+    const expected = this.workflow.getExpectedNextStatus(order.status);
     if (expected !== dto.status) {
       throw new BadRequestException(
-        `Нельзя перевести заказ из ${order.status} в ${dto.status}`,
+        `РќРµР»СЊР·СЏ РїРµСЂРµРІРµСЃС‚Рё Р·Р°РєР°Р· РёР· ${order.status} РІ ${dto.status}`,
       );
     }
 
-    order.status = dto.status;
-    const now = new Date();
-    if (dto.status === OrderStatus.Confirmed) order.confirmedAt = now;
-    else if (dto.status === OrderStatus.Ready) {
-      order.readyAt = now;
-    } else if (dto.status === OrderStatus.Closed) {
-      order.closedAt = now;
-      // освобождаем место в слоте
-      if (order.timeSlot) {
-        await this.timeSlots.decrement(
-          { id: order.timeSlot.id },
-          'bookedCount',
-          1,
-        );
-      }
+    this.workflow.applyStatusTransition(order, dto.status);
+    if (
+      this.workflow.shouldReleaseSlotAfterStatus(dto.status) &&
+      order.timeSlot
+    ) {
+      await this.timeSlots.decrement(
+        { id: order.timeSlot.id },
+        'bookedCount',
+        1,
+      );
     }
 
     const saved = await this.orders.save(order);
 
-    // уведомляем клиента когда заказ готов
-    if (dto.status === OrderStatus.Ready) {
+    // СѓРІРµРґРѕРјР»СЏРµРј РєР»РёРµРЅС‚Р° РєРѕРіРґР° Р·Р°РєР°Р· РіРѕС‚РѕРІ
+    if (this.workflow.shouldNotifyReady(dto.status)) {
       const withUser = await this.orders.findOne({
         where: { id: orderId },
         relations: { user: true },
@@ -214,25 +207,17 @@ export class OrdersService {
   }
 
   async rejectOrder(orderId: number, dto: RejectOrderDto): Promise<Order> {
-    const order = await this.orders.findOne({
-      where: { id: orderId },
-      relations: { timeSlot: true },
-    });
-    if (!order) throw new NotFoundException('Заказ не найден');
+    const order = await this.findOrderForUpdate(orderId);
 
-    if (
-      order.status !== OrderStatus.Created &&
-      order.status !== OrderStatus.Confirmed
-    ) {
+    if (!this.workflow.canReject(order.status)) {
       throw new BadRequestException(
-        `Нельзя отклонить заказ в статусе ${order.status}`,
+        `РќРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ Р·Р°РєР°Р· РІ СЃС‚Р°С‚СѓСЃРµ ${order.status}`,
       );
     }
 
-    order.status = OrderStatus.Rejected;
-    order.rejectReason = dto.reason;
+    this.workflow.applyRejection(order, dto.reason ?? '');
 
-    // освобождаем место в слоте
+    // РѕСЃРІРѕР±РѕР¶РґР°РµРј РјРµСЃС‚Рѕ РІ СЃР»РѕС‚Рµ
     if (order.timeSlot) {
       await this.timeSlots.decrement(
         { id: order.timeSlot.id },
@@ -242,6 +227,15 @@ export class OrdersService {
     }
 
     return this.orders.save(order);
+  }
+
+  private async findOrderForUpdate(orderId: number): Promise<Order> {
+    const order = await this.orders.findOne({
+      where: { id: orderId },
+      relations: { timeSlot: true },
+    });
+    if (!order) throw new NotFoundException('Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ');
+    return order;
   }
 
   async getOrdersForBarista(filters: OrdersFilterDto): Promise<Order[]> {

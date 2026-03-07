@@ -12,6 +12,7 @@ import { TimeSlotService } from './time-slot.service';
 import { TimeSlotController } from './time-slot.controller';
 import { NotificationsService } from './notifications.service';
 import { User } from '@modules/users';
+import { OrderWorkflowService } from './order-workflow.service';
 
 @Module({
   imports: [
@@ -25,7 +26,12 @@ import { User } from '@modules/users';
       User,
     ]),
   ],
-  providers: [OrdersService, TimeSlotService, NotificationsService],
+  providers: [
+    OrdersService,
+    TimeSlotService,
+    NotificationsService,
+    OrderWorkflowService,
+  ],
   controllers: [OrdersController, TimeSlotController],
   exports: [OrdersService],
 })

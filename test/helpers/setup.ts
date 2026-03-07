@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+﻿import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
@@ -67,7 +67,7 @@ export async function clearDatabase(ds: DataSource): Promise<void> {
 
 let userCounter = 0;
 
-export async function seedRoles(ds: DataSource): Promise<{
+export async function ensureRoles(ds: DataSource): Promise<{
   userRole: Role;
   baristaRole: Role;
   adminRole: Role;
@@ -75,15 +75,15 @@ export async function seedRoles(ds: DataSource): Promise<{
   const repo = ds.getRepository(Role);
   const userRole = await repo.save({
     code: RoleCode.USER,
-    name: 'Пользователь',
+    name: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
   });
   const baristaRole = await repo.save({
     code: RoleCode.BARISTA,
-    name: 'Бариста',
+    name: 'Р‘Р°СЂРёСЃС‚Р°',
   });
   const adminRole = await repo.save({
     code: RoleCode.ADMIN,
-    name: 'Администратор',
+    name: 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ',
   });
   return { userRole, baristaRole, adminRole };
 }
@@ -109,3 +109,4 @@ export function authCookie(module: TestingModule, user: User): string {
   const auth = module.get(AuthService);
   return `session=${auth.issueToken(user)}`;
 }
+

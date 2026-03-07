@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { App } from 'supertest/types';
 import { Role } from '../src/modules/users/roles/role.entity';
 import {
@@ -6,7 +6,7 @@ import {
   createTestApp,
   closeTestApp,
   clearDatabase,
-  seedRoles,
+  ensureRoles,
   createUser,
   authCookie,
 } from './helpers/setup';
@@ -18,7 +18,7 @@ describe('Auth (e2e)', () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     await clearDatabase(testApp.ds);
-    ({ userRole } = await seedRoles(testApp.ds));
+    ({ userRole } = await ensureRoles(testApp.ds));
   });
 
   afterAll(async () => {
@@ -26,13 +26,13 @@ describe('Auth (e2e)', () => {
   });
 
   describe('GET /auth/me', () => {
-    it('возвращает 401 без сессии', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· СЃРµСЃСЃРёРё', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/auth/me')
         .expect(401);
     });
 
-    it('возвращает текущего пользователя при валидном токене', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїСЂРё РІР°Р»РёРґРЅРѕРј С‚РѕРєРµРЅРµ', async () => {
       const user = await createUser(testApp.ds, [userRole]);
       const cookie = authCookie(testApp.module, user);
 
@@ -47,7 +47,7 @@ describe('Auth (e2e)', () => {
       });
     });
 
-    it('возвращает 401 с невалидным токеном', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 СЃ РЅРµРІР°Р»РёРґРЅС‹Рј С‚РѕРєРµРЅРѕРј', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/auth/me')
         .set('Cookie', 'session=invalidtoken')
@@ -56,13 +56,13 @@ describe('Auth (e2e)', () => {
   });
 
   describe('POST /auth/telegram', () => {
-    it('возвращает 401 без заголовка Authorization', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· Р·Р°РіРѕР»РѕРІРєР° Authorization', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/auth/telegram')
         .expect(401);
     });
 
-    it('возвращает 401 с неверным форматом заголовка', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 СЃ РЅРµРІРµСЂРЅС‹Рј С„РѕСЂРјР°С‚РѕРј Р·Р°РіРѕР»РѕРІРєР°', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/auth/telegram')
         .set('Authorization', 'Bearer invalid')
@@ -70,3 +70,4 @@ describe('Auth (e2e)', () => {
     });
   });
 });
+

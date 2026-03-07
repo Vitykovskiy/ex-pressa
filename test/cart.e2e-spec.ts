@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { App } from 'supertest/types';
 import { Role } from '../src/modules/users/roles/role.entity';
 import { User } from '../src/modules/users/user.entity';
@@ -7,7 +7,7 @@ import {
   createTestApp,
   closeTestApp,
   clearDatabase,
-  seedRoles,
+  ensureRoles,
   createUser,
   authCookie,
 } from './helpers/setup';
@@ -26,7 +26,7 @@ describe('Cart (e2e)', () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     await clearDatabase(testApp.ds);
-    ({ adminRole, userRole } = await seedRoles(testApp.ds));
+    ({ adminRole, userRole } = await ensureRoles(testApp.ds));
 
     adminUser = await createUser(testApp.ds, [adminRole], {
       name: 'Cart Admin',
@@ -37,11 +37,11 @@ describe('Cart (e2e)', () => {
     adminCookie = authCookie(testApp.module, adminUser);
     userCookie = authCookie(testApp.module, regularUser);
 
-    // Создаём каталог для тестов корзины
+    // РЎРѕР·РґР°С‘Рј РєР°С‚Р°Р»РѕРі РґР»СЏ С‚РµСЃС‚РѕРІ РєРѕСЂР·РёРЅС‹
     const group = await request(testApp.app.getHttpServer() as App)
       .post('/catalog/product-groups')
       .set('Cookie', adminCookie)
-      .send({ name: 'Для корзины', sortOrder: 1 })
+      .send({ name: 'Р”Р»СЏ РєРѕСЂР·РёРЅС‹', sortOrder: 1 })
       .then((r) => r.body);
 
     const food = await request(testApp.app.getHttpServer() as App)
@@ -49,7 +49,7 @@ describe('Cart (e2e)', () => {
       .set('Cookie', adminCookie)
       .send({
         groupId: group.id,
-        name: 'Пирожок',
+        name: 'РџРёСЂРѕР¶РѕРє',
         type: 'FOOD',
         isActive: true,
         isAvailable: true,
@@ -68,7 +68,7 @@ describe('Cart (e2e)', () => {
       .set('Cookie', adminCookie)
       .send({
         groupId: group.id,
-        name: 'Латте тест',
+        name: 'Р›Р°С‚С‚Рµ С‚РµСЃС‚',
         type: 'DRINK',
         isActive: true,
         isAvailable: true,
@@ -93,7 +93,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('GET /cart', () => {
-    it('возвращает пустую корзину для нового пользователя', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚СѓСЋ РєРѕСЂР·РёРЅСѓ РґР»СЏ РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
@@ -102,7 +102,7 @@ describe('Cart (e2e)', () => {
       expect(res.body.items).toEqual([]);
     });
 
-    it('возвращает 401 без авторизации', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· Р°РІС‚РѕСЂРёР·Р°С†РёРё', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .expect(401);
@@ -110,7 +110,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('POST /cart/items', () => {
-    it('добавляет позицию в корзину', async () => {
+    it('РґРѕР±Р°РІР»СЏРµС‚ РїРѕР·РёС†РёСЋ РІ РєРѕСЂР·РёРЅСѓ', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -119,12 +119,12 @@ describe('Cart (e2e)', () => {
 
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0]).toMatchObject({
-        productName: 'Пирожок',
+        productName: 'РџРёСЂРѕР¶РѕРє',
         quantity: 2,
       });
     });
 
-    it('добавляет напиток с размером', async () => {
+    it('РґРѕР±Р°РІР»СЏРµС‚ РЅР°РїРёС‚РѕРє СЃ СЂР°Р·РјРµСЂРѕРј', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -132,12 +132,12 @@ describe('Cart (e2e)', () => {
         .expect(201);
 
       const items: any[] = res.body.items;
-      const drinkItem = items.find((i) => i.productName === 'Латте тест');
+      const drinkItem = items.find((i) => i.productName === 'Р›Р°С‚С‚Рµ С‚РµСЃС‚');
       expect(drinkItem).toBeDefined();
       expect(drinkItem.sizeCode).toBe('M');
     });
 
-    it('возвращает 404 для несуществующего продукта', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 404 РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РїСЂРѕРґСѓРєС‚Р°', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -147,14 +147,14 @@ describe('Cart (e2e)', () => {
   });
 
   describe('PATCH /cart/items/:itemId', () => {
-    it('изменяет количество позиции', async () => {
-      // Сначала получаем корзину с позицией
+    it('РёР·РјРµРЅСЏРµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР·РёС†РёРё', async () => {
+      // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј РєРѕСЂР·РёРЅСѓ СЃ РїРѕР·РёС†РёРµР№
       const cart = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
         .then((r) => r.body);
 
-      const item = cart.items.find((i: any) => i.productName === 'Пирожок');
+      const item = cart.items.find((i: any) => i.productName === 'РџРёСЂРѕР¶РѕРє');
       expect(item).toBeDefined();
 
       const res = await request(testApp.app.getHttpServer() as App)
@@ -169,7 +169,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('DELETE /cart/items/:itemId', () => {
-    it('удаляет позицию из корзины', async () => {
+    it('СѓРґР°Р»СЏРµС‚ РїРѕР·РёС†РёСЋ РёР· РєРѕСЂР·РёРЅС‹', async () => {
       const cart = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
@@ -189,8 +189,8 @@ describe('Cart (e2e)', () => {
   });
 
   describe('DELETE /cart', () => {
-    it('очищает корзину', async () => {
-      // Добавляем позицию
+    it('РѕС‡РёС‰Р°РµС‚ РєРѕСЂР·РёРЅСѓ', async () => {
+      // Р”РѕР±Р°РІР»СЏРµРј РїРѕР·РёС†РёСЋ
       await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -205,3 +205,4 @@ describe('Cart (e2e)', () => {
     });
   });
 });
+

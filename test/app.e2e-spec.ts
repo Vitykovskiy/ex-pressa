@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { App } from 'supertest/types';
 import { Role } from '../src/modules/users/roles/role.entity';
 import {
@@ -6,7 +6,7 @@ import {
   createTestApp,
   closeTestApp,
   clearDatabase,
-  seedRoles,
+  ensureRoles,
   createUser,
   authCookie,
 } from './helpers/setup';
@@ -17,16 +17,16 @@ describe('App smoke (e2e)', () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     await clearDatabase(testApp.ds);
-    await seedRoles(testApp.ds);
+    await ensureRoles(testApp.ds);
   });
 
   afterAll(async () => {
     await closeTestApp(testApp);
   });
 
-  it('приложение запускается и отвечает на запросы', async () => {
-    // GET /catalog — публично доступный эндпоинт (требует авторизации по факту,
-    // но убеждаемся что приложение живо и отвечает, а не 500)
+  it('РїСЂРёР»РѕР¶РµРЅРёРµ Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ Рё РѕС‚РІРµС‡Р°РµС‚ РЅР° Р·Р°РїСЂРѕСЃС‹', async () => {
+    // GET /catalog вЂ” РїСѓР±Р»РёС‡РЅРѕ РґРѕСЃС‚СѓРїРЅС‹Р№ СЌРЅРґРїРѕРёРЅС‚ (С‚СЂРµР±СѓРµС‚ Р°РІС‚РѕСЂРёР·Р°С†РёРё РїРѕ С„Р°РєС‚Сѓ,
+    // РЅРѕ СѓР±РµР¶РґР°РµРјСЃСЏ С‡С‚Рѕ РїСЂРёР»РѕР¶РµРЅРёРµ Р¶РёРІРѕ Рё РѕС‚РІРµС‡Р°РµС‚, Р° РЅРµ 500)
     const { userRole } = await testApp.ds
       .getRepository(Role)
       .findOne({ where: { code: 'USER' as any } })
@@ -43,3 +43,4 @@ describe('App smoke (e2e)', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 });
+

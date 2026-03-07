@@ -1,4 +1,4 @@
-services:
+﻿services:
   db_test:
     image: postgres:16-alpine
     environment:
@@ -14,4 +14,4 @@ services:
       retries: 10
     # Именованный том намеренно не указан.
     # При `docker compose -f docker-compose.test.yml down` данные уничтожаются,
-    # следующий `up` даст чистую БД с дефолтным набором данных (SEED_ON_START=true).
+    # следующий `up` даст чистую тестовую БД.

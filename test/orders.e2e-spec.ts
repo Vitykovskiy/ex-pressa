@@ -1,4 +1,4 @@
-import request from 'supertest';
+﻿import request from 'supertest';
 import { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
 import { Role } from '../src/modules/users/roles/role.entity';
@@ -9,7 +9,7 @@ import {
   createTestApp,
   closeTestApp,
   clearDatabase,
-  seedRoles,
+  ensureRoles,
   createUser,
   authCookie,
 } from './helpers/setup';
@@ -44,7 +44,7 @@ async function setupCatalogAndCart(
   const group = await request(server)
     .post('/catalog/product-groups')
     .set('Cookie', adminCookie)
-    .send({ name: 'Заказы: каталог' })
+    .send({ name: 'Р—Р°РєР°Р·С‹: РєР°С‚Р°Р»РѕРі' })
     .then((r) => r.body);
 
   const product = await request(server)
@@ -52,7 +52,7 @@ async function setupCatalogAndCart(
     .set('Cookie', adminCookie)
     .send({
       groupId: group.id,
-      name: 'Капучино тест',
+      name: 'РљР°РїСѓС‡РёРЅРѕ С‚РµСЃС‚',
       type: 'FOOD',
       isActive: true,
       isAvailable: true,
@@ -87,7 +87,7 @@ describe('Orders (e2e)', () => {
   beforeAll(async () => {
     testApp = await createTestApp();
     await clearDatabase(testApp.ds);
-    ({ adminRole, baristaRole, userRole } = await seedRoles(testApp.ds));
+    ({ adminRole, baristaRole, userRole } = await ensureRoles(testApp.ds));
 
     adminUser = await createUser(testApp.ds, [adminRole], {
       name: 'Orders Admin',
@@ -109,7 +109,7 @@ describe('Orders (e2e)', () => {
   });
 
   describe('GET /orders/history', () => {
-    it('возвращает пустую историю для нового пользователя', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚СѓСЋ РёСЃС‚РѕСЂРёСЋ РґР»СЏ РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .get('/orders/history')
         .set('Cookie', userCookie)
@@ -120,8 +120,8 @@ describe('Orders (e2e)', () => {
   });
 
   describe('POST /orders/from-cart', () => {
-    it('создаёт заказ из корзины', async () => {
-      // Создаём отдельного пользователя для этого теста
+    it('СЃРѕР·РґР°С‘С‚ Р·Р°РєР°Р· РёР· РєРѕСЂР·РёРЅС‹', async () => {
+      // РЎРѕР·РґР°С‘Рј РѕС‚РґРµР»СЊРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґР»СЏ СЌС‚РѕРіРѕ С‚РµСЃС‚Р°
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Order Creator',
       });
@@ -151,7 +151,7 @@ describe('Orders (e2e)', () => {
       expect(res.body.items).toHaveLength(1);
     });
 
-    it('возвращает 400 для заполненного слота', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 400 РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРЅРѕРіРѕ СЃР»РѕС‚Р°', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Blocked User',
       });
@@ -177,7 +177,7 @@ describe('Orders (e2e)', () => {
         .expect(400);
     });
 
-    it('возвращает 404 для несуществующего слота', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 404 РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ СЃР»РѕС‚Р°', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'No Slot User',
       });
@@ -198,7 +198,7 @@ describe('Orders (e2e)', () => {
   });
 
   describe('POST /orders/search (barista)', () => {
-    it('возвращает список заказов', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє Р·Р°РєР°Р·РѕРІ', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/orders/search')
         .set('Cookie', baristaCookie)
@@ -208,7 +208,7 @@ describe('Orders (e2e)', () => {
       expect(Array.isArray(res.body)).toBe(true);
     });
 
-    it('возвращает 403 для обычного пользователя', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 403 РґР»СЏ РѕР±С‹С‡РЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/orders/search')
         .set('Cookie', userCookie)
@@ -218,7 +218,7 @@ describe('Orders (e2e)', () => {
   });
 
   describe('PATCH /orders/:id/status', () => {
-    it('переводит заказ через цепочку статусов CREATED → CONFIRMED → READY → CLOSED', async () => {
+    it('РїРµСЂРµРІРѕРґРёС‚ Р·Р°РєР°Р· С‡РµСЂРµР· С†РµРїРѕС‡РєСѓ СЃС‚Р°С‚СѓСЃРѕРІ CREATED в†’ CONFIRMED в†’ READY в†’ CLOSED', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Status Test User',
       });
@@ -243,7 +243,7 @@ describe('Orders (e2e)', () => {
 
       expect(order.status).toBe('CREATED');
 
-      // CREATED → CONFIRMED
+      // CREATED в†’ CONFIRMED
       const confirmed = await request(testApp.app.getHttpServer() as App)
         .patch(`/orders/${order.id}/status`)
         .set('Cookie', baristaCookie)
@@ -251,7 +251,7 @@ describe('Orders (e2e)', () => {
         .expect(200);
       expect(confirmed.body.status).toBe('CONFIRMED');
 
-      // CONFIRMED → READY
+      // CONFIRMED в†’ READY
       const ready = await request(testApp.app.getHttpServer() as App)
         .patch(`/orders/${order.id}/status`)
         .set('Cookie', baristaCookie)
@@ -259,7 +259,7 @@ describe('Orders (e2e)', () => {
         .expect(200);
       expect(ready.body.status).toBe('READY');
 
-      // READY → CLOSED
+      // READY в†’ CLOSED
       const closed = await request(testApp.app.getHttpServer() as App)
         .patch(`/orders/${order.id}/status`)
         .set('Cookie', baristaCookie)
@@ -268,7 +268,7 @@ describe('Orders (e2e)', () => {
       expect(closed.body.status).toBe('CLOSED');
     });
 
-    it('возвращает 400 при недопустимом переходе статуса', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 400 РїСЂРё РЅРµРґРѕРїСѓСЃС‚РёРјРѕРј РїРµСЂРµС…РѕРґРµ СЃС‚Р°С‚СѓСЃР°', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Bad Transition User',
       });
@@ -294,13 +294,13 @@ describe('Orders (e2e)', () => {
       return request(testApp.app.getHttpServer() as App)
         .patch(`/orders/${order.id}/status`)
         .set('Cookie', baristaCookie)
-        .send({ status: 'READY' }) // пропускаем CONFIRMED
+        .send({ status: 'READY' }) // РїСЂРѕРїСѓСЃРєР°РµРј CONFIRMED
         .expect(400);
     });
   });
 
   describe('POST /orders/:id/reject', () => {
-    it('отклоняет заказ с причиной', async () => {
+    it('РѕС‚РєР»РѕРЅСЏРµС‚ Р·Р°РєР°Р· СЃ РїСЂРёС‡РёРЅРѕР№', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Reject Test User',
       });
@@ -326,14 +326,14 @@ describe('Orders (e2e)', () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post(`/orders/${order.id}/reject`)
         .set('Cookie', baristaCookie)
-        .send({ reason: 'Нет ингредиентов' })
+        .send({ reason: 'РќРµС‚ РёРЅРіСЂРµРґРёРµРЅС‚РѕРІ' })
         .expect(201);
 
       expect(res.body.status).toBe('REJECTED');
-      expect(res.body.rejectReason).toBe('Нет ингредиентов');
+      expect(res.body.rejectReason).toBe('РќРµС‚ РёРЅРіСЂРµРґРёРµРЅС‚РѕРІ');
     });
 
-    it('возвращает 403 для обычного пользователя', async () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 403 РґР»СЏ РѕР±С‹С‡РЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', async () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/orders/99999/reject')
         .set('Cookie', userCookie)
@@ -342,8 +342,8 @@ describe('Orders (e2e)', () => {
     });
   });
 
-  describe('GET /orders/history (после создания заказов)', () => {
-    it('возвращает историю заказов текущего пользователя', async () => {
+  describe('GET /orders/history (РїРѕСЃР»Рµ СЃРѕР·РґР°РЅРёСЏ Р·Р°РєР°Р·РѕРІ)', () => {
+    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РёСЃС‚РѕСЂРёСЋ Р·Р°РєР°Р·РѕРІ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'History User',
       });
@@ -375,3 +375,4 @@ describe('Orders (e2e)', () => {
     });
   });
 });
+

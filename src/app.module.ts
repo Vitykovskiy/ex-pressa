@@ -10,7 +10,6 @@ import { CartModule } from '@modules/cart';
 import { CatalogModule } from '@modules/catalog';
 import { OrdersModule } from '@modules/orders';
 import { UsersModule } from '@modules/users';
-import { SeedModule } from '@modules/seed/seed.module';
 
 @Module({
   imports: [
@@ -49,7 +48,6 @@ import { SeedModule } from '@modules/seed/seed.module';
     CatalogModule,
     CartModule,
     OrdersModule,
-    SeedModule,
   ],
   providers: [
     {

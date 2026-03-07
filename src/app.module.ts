@@ -17,7 +17,8 @@ import { SeedModule } from '@modules/seed/seed.module';
     ConfigModule.forRoot({
       isGlobal: true,
       // .env.test (если есть) перекрывает значения из .env для тестовой БД
-      envFilePath: ['.env.test', '.env'],
+      envFilePath:
+        process.env.NODE_ENV === 'test' ? ['.env.test', '.env'] : ['.env'],
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({

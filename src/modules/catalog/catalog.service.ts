@@ -187,7 +187,8 @@ export class CatalogService {
       product.group = group;
     }
 
-    const { groupId: _, ...rest } = dto;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { groupId: _groupId, ...rest } = dto;
     Object.assign(product, rest);
     return this.products.save(product);
   }

@@ -3,11 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import {
-  User,
-  Role,
-  RoleCode,
-} from '@modules/users';
+import { User, Role, RoleCode } from '@modules/users';
 import {
   ProductGroup,
   Product,
@@ -18,12 +14,7 @@ import {
   ProductType,
   DrinkSizeCode,
 } from '@modules/catalog';
-import {
-  TimeSlot,
-  Order,
-  OrderItem,
-  OrderStatus,
-} from '@modules/orders';
+import { TimeSlot, Order, OrderItem, OrderStatus } from '@modules/orders';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -34,15 +25,21 @@ export class SeedService implements OnModuleInit {
     private readonly config: ConfigService,
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
-    @InjectRepository(ProductGroup) private readonly pgRepo: Repository<ProductGroup>,
-    @InjectRepository(Product) private readonly productRepo: Repository<Product>,
-    @InjectRepository(ProductPrice) private readonly priceRepo: Repository<ProductPrice>,
-    @InjectRepository(AddonGroup) private readonly agRepo: Repository<AddonGroup>,
+    @InjectRepository(ProductGroup)
+    private readonly pgRepo: Repository<ProductGroup>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    @InjectRepository(ProductPrice)
+    private readonly priceRepo: Repository<ProductPrice>,
+    @InjectRepository(AddonGroup)
+    private readonly agRepo: Repository<AddonGroup>,
     @InjectRepository(Addon) private readonly addonRepo: Repository<Addon>,
-    @InjectRepository(ProductGroupAddonGroup) private readonly pgagRepo: Repository<ProductGroupAddonGroup>,
+    @InjectRepository(ProductGroupAddonGroup)
+    private readonly pgagRepo: Repository<ProductGroupAddonGroup>,
     @InjectRepository(TimeSlot) private readonly slotRepo: Repository<TimeSlot>,
     @InjectRepository(Order) private readonly orderRepo: Repository<Order>,
-    @InjectRepository(OrderItem) private readonly itemRepo: Repository<OrderItem>,
+    @InjectRepository(OrderItem)
+    private readonly itemRepo: Repository<OrderItem>,
   ) {
     this.enabled = config.get<string>('SEED_ON_START') === 'true';
   }
@@ -63,9 +60,18 @@ export class SeedService implements OnModuleInit {
 
   private async seed(): Promise<void> {
     // ── Роли ──────────────────────────────────────────────────────────────────
-    const roleUser = await this.roleRepo.save({ code: RoleCode.USER, name: 'Пользователь' });
-    const roleBarista = await this.roleRepo.save({ code: RoleCode.BARISTA, name: 'Бариста' });
-    const roleAdmin = await this.roleRepo.save({ code: RoleCode.ADMIN, name: 'Администратор' });
+    const roleUser = await this.roleRepo.save({
+      code: RoleCode.USER,
+      name: 'Пользователь',
+    });
+    const roleBarista = await this.roleRepo.save({
+      code: RoleCode.BARISTA,
+      name: 'Бариста',
+    });
+    const roleAdmin = await this.roleRepo.save({
+      code: RoleCode.ADMIN,
+      name: 'Администратор',
+    });
 
     // ── Пользователи ──────────────────────────────────────────────────────────
     const testUser = await this.userRepo.save({
@@ -99,16 +105,41 @@ export class SeedService implements OnModuleInit {
     });
 
     // ── Каталог: группы допов ─────────────────────────────────────────────────
-    const syrups = await this.agRepo.save({ name: 'Сиропы', sortOrder: 1, isActive: true });
-    await this.addonRepo.save({ addonGroup: syrups, name: 'Ваниль', priceRub: 50, isActive: true });
-    await this.addonRepo.save({ addonGroup: syrups, name: 'Карамель', priceRub: 50, isActive: true });
+    const syrups = await this.agRepo.save({
+      name: 'Сиропы',
+      sortOrder: 1,
+      isActive: true,
+    });
+    await this.addonRepo.save({
+      addonGroup: syrups,
+      name: 'Ваниль',
+      priceRub: 50,
+      isActive: true,
+    });
+    await this.addonRepo.save({
+      addonGroup: syrups,
+      name: 'Карамель',
+      priceRub: 50,
+      isActive: true,
+    });
 
     // ── Каталог: группы товаров ───────────────────────────────────────────────
-    const drinks = await this.pgRepo.save({ name: 'Напитки', sortOrder: 1, isActive: true });
-    const food = await this.pgRepo.save({ name: 'Еда', sortOrder: 2, isActive: true });
+    const drinks = await this.pgRepo.save({
+      name: 'Напитки',
+      sortOrder: 1,
+      isActive: true,
+    });
+    const food = await this.pgRepo.save({
+      name: 'Еда',
+      sortOrder: 2,
+      isActive: true,
+    });
 
     // Привязка Напитки ↔ Сиропы
-    await this.pgagRepo.save({ productGroupId: drinks.id, addonGroupId: syrups.id });
+    await this.pgagRepo.save({
+      productGroupId: drinks.id,
+      addonGroupId: syrups.id,
+    });
 
     // ── Каталог: товары ───────────────────────────────────────────────────────
     const cappuccino = await this.productRepo.save({
@@ -121,9 +152,24 @@ export class SeedService implements OnModuleInit {
       sortOrder: 1,
     });
     await this.priceRepo.save([
-      { product: cappuccino, sizeCode: DrinkSizeCode.S, priceRub: 150, isActive: true },
-      { product: cappuccino, sizeCode: DrinkSizeCode.M, priceRub: 200, isActive: true },
-      { product: cappuccino, sizeCode: DrinkSizeCode.L, priceRub: 250, isActive: true },
+      {
+        product: cappuccino,
+        sizeCode: DrinkSizeCode.S,
+        priceRub: 150,
+        isActive: true,
+      },
+      {
+        product: cappuccino,
+        sizeCode: DrinkSizeCode.M,
+        priceRub: 200,
+        isActive: true,
+      },
+      {
+        product: cappuccino,
+        sizeCode: DrinkSizeCode.L,
+        priceRub: 250,
+        isActive: true,
+      },
     ]);
 
     const latte = await this.productRepo.save({
@@ -136,9 +182,24 @@ export class SeedService implements OnModuleInit {
       sortOrder: 2,
     });
     await this.priceRepo.save([
-      { product: latte, sizeCode: DrinkSizeCode.S, priceRub: 160, isActive: true },
-      { product: latte, sizeCode: DrinkSizeCode.M, priceRub: 210, isActive: true },
-      { product: latte, sizeCode: DrinkSizeCode.L, priceRub: 260, isActive: true },
+      {
+        product: latte,
+        sizeCode: DrinkSizeCode.S,
+        priceRub: 160,
+        isActive: true,
+      },
+      {
+        product: latte,
+        sizeCode: DrinkSizeCode.M,
+        priceRub: 210,
+        isActive: true,
+      },
+      {
+        product: latte,
+        sizeCode: DrinkSizeCode.L,
+        priceRub: 260,
+        isActive: true,
+      },
     ]);
 
     const croissant = await this.productRepo.save({
@@ -166,14 +227,42 @@ export class SeedService implements OnModuleInit {
     ];
 
     // Сегодня: слот 1 свободен, слот 2 полный, слот 3 частично заполнен
-    const slot1 = await this.slotRepo.save({ date: dateStr(0), timeFrom: '09:00:00', timeTo: '09:10:00', capacity: 5, bookedCount: 0, isActive: true });
-    const slot2 = await this.slotRepo.save({ date: dateStr(0), timeFrom: '09:10:00', timeTo: '09:20:00', capacity: 5, bookedCount: 5, isActive: true });
-    const slot3 = await this.slotRepo.save({ date: dateStr(0), timeFrom: '09:20:00', timeTo: '09:30:00', capacity: 5, bookedCount: 2, isActive: true });
+    const slot1 = await this.slotRepo.save({
+      date: dateStr(0),
+      timeFrom: '09:00:00',
+      timeTo: '09:10:00',
+      capacity: 5,
+      bookedCount: 0,
+      isActive: true,
+    });
+    const slot2 = await this.slotRepo.save({
+      date: dateStr(0),
+      timeFrom: '09:10:00',
+      timeTo: '09:20:00',
+      capacity: 5,
+      bookedCount: 5,
+      isActive: true,
+    });
+    const slot3 = await this.slotRepo.save({
+      date: dateStr(0),
+      timeFrom: '09:20:00',
+      timeTo: '09:30:00',
+      capacity: 5,
+      bookedCount: 2,
+      isActive: true,
+    });
 
     // Следующие 6 дней — пустые слоты
     for (let day = 1; day <= 6; day++) {
       for (const { from, to } of slotTimes) {
-        await this.slotRepo.save({ date: dateStr(day), timeFrom: from, timeTo: to, capacity: 5, bookedCount: 0, isActive: true });
+        await this.slotRepo.save({
+          date: dateStr(day),
+          timeFrom: from,
+          timeTo: to,
+          capacity: 5,
+          bookedCount: 0,
+          isActive: true,
+        });
       }
     }
 
@@ -187,7 +276,14 @@ export class SeedService implements OnModuleInit {
       slotTimeTo: '09:10:00',
       totalRub: 200,
     });
-    await this.itemRepo.save({ order: order1, productName: 'Капучино', quantity: 1, sizeCode: 'M', unitPriceRub: 200, lineTotalRub: 200 });
+    await this.itemRepo.save({
+      order: order1,
+      productName: 'Капучино',
+      quantity: 1,
+      sizeCode: 'M',
+      unitPriceRub: 200,
+      lineTotalRub: 200,
+    });
 
     // Заказ #2: CONFIRMED
     const order2 = await this.orderRepo.save({
@@ -199,7 +295,14 @@ export class SeedService implements OnModuleInit {
       totalRub: 210,
       confirmedAt: new Date(),
     });
-    await this.itemRepo.save({ order: order2, productName: 'Латте', quantity: 1, sizeCode: 'M', unitPriceRub: 210, lineTotalRub: 210 });
+    await this.itemRepo.save({
+      order: order2,
+      productName: 'Латте',
+      quantity: 1,
+      sizeCode: 'M',
+      unitPriceRub: 210,
+      lineTotalRub: 210,
+    });
 
     // Заказ #3: READY
     const order3 = await this.orderRepo.save({
@@ -212,7 +315,13 @@ export class SeedService implements OnModuleInit {
       confirmedAt: new Date(),
       readyAt: new Date(),
     });
-    await this.itemRepo.save({ order: order3, productName: 'Круассан', quantity: 1, sizeCode: null, unitPriceRub: 120, lineTotalRub: 120 });
+    await this.itemRepo.save({
+      order: order3,
+      productName: 'Круассан',
+      quantity: 1,
+      unitPriceRub: 120,
+      lineTotalRub: 120,
+    });
 
     // Заказ #4: REJECTED (для истории заказов customer)
     const order4 = await this.orderRepo.save({
@@ -224,6 +333,13 @@ export class SeedService implements OnModuleInit {
       totalRub: 200,
       rejectReason: 'Нет ингредиентов',
     });
-    await this.itemRepo.save({ order: order4, productName: 'Капучино', quantity: 1, sizeCode: 'M', unitPriceRub: 200, lineTotalRub: 200 });
+    await this.itemRepo.save({
+      order: order4,
+      productName: 'Капучино',
+      quantity: 1,
+      sizeCode: 'M',
+      unitPriceRub: 200,
+      lineTotalRub: 200,
+    });
   }
 }

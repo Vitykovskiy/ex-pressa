@@ -1,25 +1,45 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { Role } from '../src/modules/users/roles/role.entity';
+import {
+  TestApp,
+  createTestApp,
+  closeTestApp,
+  clearDatabase,
+  seedRoles,
+  createUser,
+  authCookie,
+} from './helpers/setup';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+describe('App smoke (e2e)', () => {
+  let testApp: TestApp;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    testApp = await createTestApp();
+    await clearDatabase(testApp.ds);
+    await seedRoles(testApp.ds);
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterAll(async () => {
+    await closeTestApp(testApp);
+  });
+
+  it('приложение запускается и отвечает на запросы', async () => {
+    // GET /catalog — публично доступный эндпоинт (требует авторизации по факту,
+    // но убеждаемся что приложение живо и отвечает, а не 500)
+    const { userRole } = await testApp.ds
+      .getRepository(Role)
+      .findOne({ where: { code: 'USER' as any } })
+      .then((r) => ({ userRole: r! }));
+
+    const user = await createUser(testApp.ds, [userRole]);
+    const cookie = authCookie(testApp.module, user);
+
+    const res = await request(testApp.app.getHttpServer() as App)
+      .get('/catalog')
+      .set('Cookie', cookie);
+
+    expect(res.status).not.toBe(500);
+    expect(Array.isArray(res.body)).toBe(true);
   });
 });

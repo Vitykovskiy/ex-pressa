@@ -17,7 +17,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:truncate": "docker exec ex-pressa-postgres psql -U postgres -d ex-pressa -c \"TRUNCATE TABLE addon_groups, addons, cart_item_addons, cart_items, carts, order_item_addons, order_items, orders, product_group_addon_groups, product_groups, product_prices, products, roles, time_slots, user_roles, users RESTART IDENTITY CASCADE;\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

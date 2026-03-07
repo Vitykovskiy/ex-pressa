@@ -1,7 +1,7 @@
 import { Update, Start, Ctx } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../users.service';
-import { WEB_APP_URL } from 'src/main';
+const WEB_APP_URL = process.env.WEB_APP_URL ?? 'http://localhost:3000';
 import { Public } from '@modules/auth/public.decorator';
 
 function getFrom(ctx: Context) {

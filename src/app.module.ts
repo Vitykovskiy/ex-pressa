@@ -40,7 +40,8 @@ import { UsersModule } from '@modules/users';
         if (!token) {
           throw new Error('TELEGRAM_BOT_TOKEN отсутствует в .env');
         }
-        return { token };
+        const isTest = config.get<string>('NODE_ENV') === 'test';
+        return { token, launchOptions: isTest ? false : {} };
       },
     }),
     UsersModule,

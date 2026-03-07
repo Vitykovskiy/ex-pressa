@@ -23,6 +23,9 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+  app.use('/health', (_req: unknown, res: { json: (body: unknown) => void }) => {
+    res.json({ status: 'ok' });
+  });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('ex-pressa API')

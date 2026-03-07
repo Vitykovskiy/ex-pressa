@@ -32,6 +32,23 @@ export class UsersService {
     return this.repo.findOne({ where: { id }, relations: { roles: true } });
   }
 
+  async ensureSkipAuthUser(): Promise<User> {
+    const existing = await this.repo.findOne({
+      where: { tgUsername: 'dev_user' },
+    });
+    if (existing) {
+      return existing;
+    }
+
+    const user = this.repo.create({
+      name: 'Dev User',
+      tgUsername: 'dev_user',
+      isActive: true,
+      isConfirmed: true,
+    });
+    return this.repo.save(user);
+  }
+
   async createOrFindByTgId(dto: CreateUserDto): Promise<User> {
     const user = await this.findByTgId(dto.tgId!);
 

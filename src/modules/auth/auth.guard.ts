@@ -48,7 +48,18 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (this.skipAuth) {
       const request = context.switchToHttp().getRequest<Request>();
-      (request as Request & { user: User }).user = DEV_USER;
+      const persistedUser = await this.users.ensureSkipAuthUser();
+      (request as Request & { user: User }).user = Object.assign(
+        new User(),
+        DEV_USER,
+        {
+          id: persistedUser.id,
+          name: persistedUser.name,
+          tgUsername: persistedUser.tgUsername,
+          isActive: persistedUser.isActive,
+          isConfirmed: persistedUser.isConfirmed,
+        },
+      );
       return true;
     }
 

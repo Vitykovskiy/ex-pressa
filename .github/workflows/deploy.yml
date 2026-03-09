@@ -27,6 +27,7 @@ jobs:
           script: |
             set -euo pipefail
             PRIMARY_TELEGRAM_TOKEN="$(printf '%s' '${{ secrets.TELEGRAM_BOT_TOKENS }}' | cut -d',' -f1)"
+            ENV_FILE="${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
             git fetch origin prod:refs/remotes/origin/prod
@@ -34,25 +35,41 @@ jobs:
             git clean -fd
             git checkout -B prod origin/prod
 
-            cat > "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend" <<EOF
+            if [ -f "$ENV_FILE" ]; then
+              set -a
+              . "$ENV_FILE"
+              set +a
+            fi
+
+            DB_HOST_VALUE="${DB_HOST:-${{ secrets.DB_HOST }}}"
+            DB_PORT_VALUE="${DB_PORT:-${{ secrets.DB_PORT }}}"
+            DB_USER_VALUE="${DB_USER:-${{ secrets.DB_USER }}}"
+            DB_PASS_VALUE="${DB_PASS:-${{ secrets.DB_PASS }}}"
+            DB_NAME_VALUE="${DB_NAME:-${{ secrets.DB_NAME }}}"
+            AUTH_JWT_SECRET_VALUE="${AUTH_JWT_SECRET:-${{ secrets.AUTH_JWT_SECRET }}}"
+
+            cat > "$ENV_FILE" <<EOF
             NODE_ENV=production
             PORT=${{ secrets.PORT }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASS }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}
+            DB_HOST=$DB_HOST_VALUE
+            DB_PORT=$DB_PORT_VALUE
+            DB_USER=$DB_USER_VALUE
+            DB_PASS=$DB_PASS_VALUE
+            DB_NAME=$DB_NAME_VALUE
+            AUTH_JWT_SECRET=$AUTH_JWT_SECRET_VALUE
             TELEGRAM_BOT_TOKEN=$PRIMARY_TELEGRAM_TOKEN
             TELEGRAM_BOT_TOKENS=${{ secrets.TELEGRAM_BOT_TOKENS }}
             WEB_APP_URL=${{ secrets.WEB_APP_URL }}
             BOT_WEB_APP_URL=${{ secrets.BOT_WEB_APP_URL }}
             SKIP_AUTH=false
             EOF
-            chmod 600 "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
+            chmod 600 "$ENV_FILE"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/deploy"
             docker-compose build backend
+            for container in $(docker ps -a --format '{{.Names}}' | grep backend); do
+              docker rm -f "$container" >/dev/null 2>&1 || true
+            done
             docker-compose up -d postgres backend
 
             curl -fsS https://api.216.57.105.133.sslip.io/health >/dev/null

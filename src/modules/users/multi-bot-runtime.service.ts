@@ -29,6 +29,7 @@ function getFrom(ctx: Context) {
 export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MultiBotRuntimeService.name);
   private readonly bots: Telegraf[] = [];
+  private started = false;
 
   constructor(
     private readonly config: ConfigService,
@@ -36,26 +37,13 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (this.config.get<string>('NODE_ENV') === 'test') {
+    if (this.config.get<string>('NODE_ENV') === 'test' || this.started) {
       return;
     }
-
-    const urls = resolveWebAppUrls(
-      this.config.get<string>('BOT_WEB_APP_URL', ''),
-      this.config.get<string>('WEB_APP_URL', ''),
-    );
-
-    const links = buildBotWebAppLinks({
-      primaryToken: this.config.get<string>('TELEGRAM_BOT_TOKEN', ''),
-      extraTokens: this.config.get<string>('TELEGRAM_BOT_TOKENS', ''),
-      customerUrl: urls.customerUrl,
-      baristaUrl: urls.baristaUrl,
-      adminUrl: urls.adminUrl,
+    this.started = true;
+    queueMicrotask(() => {
+      void this.startExtraBots();
     });
-
-    for (const link of links.slice(1)) {
-      await this.launchBot(link);
-    }
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -70,6 +58,31 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
         }
       }),
     );
+  }
+
+  private async startExtraBots(): Promise<void> {
+    try {
+      const urls = resolveWebAppUrls(
+        this.config.get<string>('BOT_WEB_APP_URL', ''),
+        this.config.get<string>('WEB_APP_URL', ''),
+      );
+
+      const links = buildBotWebAppLinks({
+        primaryToken: this.config.get<string>('TELEGRAM_BOT_TOKEN', ''),
+        extraTokens: this.config.get<string>('TELEGRAM_BOT_TOKENS', ''),
+        customerUrl: urls.customerUrl,
+        baristaUrl: urls.baristaUrl,
+        adminUrl: urls.adminUrl,
+      });
+
+      for (const link of links.slice(1)) {
+        await this.launchBot(link);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to start extra bots: ${error instanceof Error ? error.stack ?? error.message : String(error)}`,
+      );
+    }
   }
 
   private async launchBot(link: BotWebAppLink): Promise<void> {

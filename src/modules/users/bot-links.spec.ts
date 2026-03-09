@@ -1,4 +1,4 @@
-import { buildBotWebAppLinks } from './bot-links';
+import { buildBotWebAppLinks, resolveWebAppUrls } from './bot-links';
 
 describe('buildBotWebAppLinks', () => {
   it('maps primary and extra tokens to customer, barista, admin web apps', () => {
@@ -50,5 +50,17 @@ describe('buildBotWebAppLinks', () => {
       },
     ]);
   });
-});
 
+  it('resolves production url order customer, admin, barista', () => {
+    expect(
+      resolveWebAppUrls(
+        'https://customer.example.com',
+        'https://customer.example.com,https://admin.example.com,https://barista.example.com',
+      ),
+    ).toEqual({
+      customerUrl: 'https://customer.example.com',
+      adminUrl: 'https://admin.example.com',
+      baristaUrl: 'https://barista.example.com',
+    });
+  });
+});

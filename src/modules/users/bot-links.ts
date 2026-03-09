@@ -12,6 +12,22 @@ export interface BotLinkEnv {
   adminUrl?: string;
 }
 
+export function resolveWebAppUrls(
+  botWebAppUrl?: string,
+  webAppUrlList?: string,
+): { customerUrl?: string; adminUrl?: string; baristaUrl?: string } {
+  const urls = (webAppUrlList ?? '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return {
+    customerUrl: botWebAppUrl?.trim() || urls[0],
+    adminUrl: urls[1],
+    baristaUrl: urls[2],
+  };
+}
+
 function splitCsv(value?: string): string[] {
   return (value ?? '')
     .split(',')
@@ -24,22 +40,29 @@ export function buildBotWebAppLinks(env: BotLinkEnv): BotWebAppLink[] {
     (token, index, items) => Boolean(token) && items.indexOf(token) === index,
   );
 
-  const urls = [
-    env.customerUrl?.trim(),
-    env.baristaUrl?.trim(),
-    env.adminUrl?.trim(),
-  ].filter(Boolean) as string[];
-
-  const labels = [
-    'Открыть меню',
-    'Открыть панель баристы',
-    'Открыть панель администратора',
+  const links: Array<BotWebAppLink | null> = [
+    env.customerUrl
+      ? {
+          token: tokens[0] ?? '',
+          appUrl: env.customerUrl.trim(),
+          buttonText: 'Открыть меню',
+        }
+      : null,
+    env.baristaUrl
+      ? {
+          token: tokens[1] ?? '',
+          appUrl: env.baristaUrl.trim(),
+          buttonText: 'Открыть панель баристы',
+        }
+      : null,
+    env.adminUrl
+      ? {
+          token: tokens[2] ?? '',
+          appUrl: env.adminUrl.trim(),
+          buttonText: 'Открыть панель администратора',
+        }
+      : null,
   ];
 
-  return tokens.slice(0, urls.length).map((token, index) => ({
-    token,
-    appUrl: urls[index],
-    buttonText: labels[index],
-  }));
+  return links.filter((link): link is BotWebAppLink => Boolean(link?.token));
 }
-

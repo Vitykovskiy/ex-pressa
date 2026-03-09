@@ -6,7 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Context, Markup, Telegraf } from 'telegraf';
-import { buildBotWebAppLinks, type BotWebAppLink } from './bot-links';
+import {
+  buildBotWebAppLinks,
+  resolveWebAppUrls,
+  type BotWebAppLink,
+} from './bot-links';
 import { UsersService } from './users.service';
 
 function getFrom(ctx: Context) {
@@ -36,18 +40,17 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const webAppUrls = (this.config.get<string>('WEB_APP_URL', '') || '')
-      .split(',')
-      .map((url) => url.trim())
-      .filter(Boolean);
+    const urls = resolveWebAppUrls(
+      this.config.get<string>('BOT_WEB_APP_URL', ''),
+      this.config.get<string>('WEB_APP_URL', ''),
+    );
 
     const links = buildBotWebAppLinks({
       primaryToken: this.config.get<string>('TELEGRAM_BOT_TOKEN', ''),
       extraTokens: this.config.get<string>('TELEGRAM_BOT_TOKENS', ''),
-      customerUrl:
-        this.config.get<string>('BOT_WEB_APP_URL', '') || webAppUrls[0],
-      baristaUrl: webAppUrls[1],
-      adminUrl: webAppUrls[2],
+      customerUrl: urls.customerUrl,
+      baristaUrl: urls.baristaUrl,
+      adminUrl: urls.adminUrl,
     });
 
     for (const link of links.slice(1)) {
@@ -93,4 +96,3 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
     this.logger.log(`Extra bot launched for ${link.buttonText}`);
   }
 }
-

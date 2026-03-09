@@ -29,9 +29,8 @@ jobs:
             PRIMARY_TELEGRAM_TOKEN="$(printf '%s' '${{ secrets.TELEGRAM_BOT_TOKENS }}' | cut -d',' -f1)"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
-            git fetch origin
-            git checkout prod
-            git pull --ff-only origin prod
+            git fetch origin prod
+            git checkout -B prod origin/prod
 
             cat > "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend" <<EOF
             NODE_ENV=production

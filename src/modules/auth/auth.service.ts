@@ -22,7 +22,10 @@ export class AuthService {
 
     return [primary, ...extra.split(',')]
       .map((token) => token.trim())
-      .filter((token, index, items) => Boolean(token) && items.indexOf(token) === index);
+      .filter(
+        (token, index, items) =>
+          Boolean(token) && items.indexOf(token) === index,
+      );
   }
 
   private get jwtSecret(): string {

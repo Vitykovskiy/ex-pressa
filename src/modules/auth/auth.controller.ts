@@ -16,6 +16,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { User } from '@modules/users';
 import { Public } from './public.decorator';
+import { extractTelegramInitData } from './helpers';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -59,8 +60,11 @@ export class AuthController {
 
   private async handleTelegramAuth(req: Request, res: Response) {
     const authHeader = req.headers['authorization'];
-
-    const initData = this.getInitDataFromAuthHeader(authHeader);
+    const bodyInitData =
+      typeof req.body === 'object' && req.body !== null
+        ? (req.body as { initData?: unknown }).initData
+        : undefined;
+    const initData = extractTelegramInitData(authHeader, bodyInitData);
 
     if (!initData) {
       throw new UnauthorizedException('Отсутствует заголовок Authorization');
@@ -79,19 +83,5 @@ export class AuthController {
     });
 
     return { ok: true, user };
-  }
-
-  private getInitDataFromAuthHeader(headerValue?: string): string {
-    if (!headerValue) {
-      return '';
-    }
-
-    const [authType, authData] = headerValue.split(' ');
-
-    if (authType !== 'tma' || !authData) {
-      return '';
-    }
-
-    return authData;
   }
 }

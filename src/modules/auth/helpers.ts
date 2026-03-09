@@ -35,3 +35,21 @@ export function verifyTelegramInitData(
     };
   }
 }
+
+export function extractTelegramInitData(
+  authHeader?: string,
+  bodyInitData?: unknown,
+): string {
+  if (typeof authHeader === 'string' && authHeader.startsWith('tma ')) {
+    const initData = authHeader.slice(4).trim();
+    if (initData) {
+      return initData;
+    }
+  }
+
+  if (typeof bodyInitData === 'string') {
+    return bodyInitData.trim();
+  }
+
+  return '';
+}

@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && tsc-alias -p tsconfig.json",
+    "build": "npm run check:text && nest build && tsc-alias -p tsconfig.json",
+    "check:text": "node tools/check-text-corruption.mjs",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

@@ -29,7 +29,7 @@ jobs:
             PRIMARY_TELEGRAM_TOKEN="$(printf '%s' '${{ secrets.TELEGRAM_BOT_TOKENS }}' | cut -d',' -f1)"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
-            git fetch origin prod
+            git fetch origin prod:refs/remotes/origin/prod
             git checkout -B prod origin/prod
 
             cat > "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend" <<EOF

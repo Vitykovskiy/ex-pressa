@@ -75,13 +75,36 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
         adminUrl: urls.adminUrl,
       });
 
-      for (const link of links.slice(1)) {
-        await this.launchBot(link);
-      }
+      await Promise.allSettled(
+        links.map((link, index) =>
+          index === 0
+            ? this.configureMenuButton(link)
+            : this.launchBot(link),
+        ),
+      );
     } catch (error) {
       this.logger.error(
         `Failed to start extra bots: ${error instanceof Error ? error.stack ?? error.message : String(error)}`,
       );
+    }
+  }
+
+  private async configureMenuButton(link: BotWebAppLink): Promise<void> {
+    const bot = new Telegraf(link.token);
+
+    try {
+      await bot.telegram.setChatMenuButton({
+        menuButton: {
+          type: 'web_app',
+          text: link.buttonText,
+          web_app: {
+            url: link.appUrl,
+          },
+        },
+      });
+      this.logger.log(`Menu button configured for ${link.buttonText}`);
+    } finally {
+      await bot.stop();
     }
   }
 
@@ -104,6 +127,15 @@ export class MultiBotRuntimeService implements OnModuleInit, OnModuleDestroy {
       );
     });
 
+    await bot.telegram.setChatMenuButton({
+      menuButton: {
+        type: 'web_app',
+        text: link.buttonText,
+        web_app: {
+          url: link.appUrl,
+        },
+      },
+    });
     await bot.launch();
     this.bots.push(bot);
     this.logger.log(`Extra bot launched for ${link.buttonText}`);

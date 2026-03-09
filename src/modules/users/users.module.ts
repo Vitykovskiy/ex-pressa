@@ -13,4 +13,6 @@ import { UsersService } from './users.service';
   providers: [UsersService, UsersBotController, MultiBotRuntimeService],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule {
+  constructor(private readonly _multiBotRuntimeService: MultiBotRuntimeService) {}
+}

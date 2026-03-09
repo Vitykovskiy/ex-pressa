@@ -1,9 +1,14 @@
-name: Deploy backend
+name: Deploy Backend Prod
 
 on:
   push:
     branches:
-      - deploy
+      - prod
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-prod
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -21,31 +26,32 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
             set -euo pipefail
+            PRIMARY_TELEGRAM_TOKEN="$(printf '%s' '${{ secrets.TELEGRAM_BOT_TOKENS }}' | cut -d',' -f1)"
 
-            # 1) update code
-            cd ~/deploy/back
+            cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
             git fetch origin
-            git checkout deploy
-            git reset --hard origin/deploy
+            git checkout prod
+            git pull --ff-only origin prod
 
-            # 2) write .env (defaults + secrets)
-            cat > ~/deploy/back/.env <<'EOF'
-            DB_HOST=postgres
-            EOF
-
-            cat >> ~/deploy/back/.env <<EOF
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}
+            cat > "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend" <<EOF
+            NODE_ENV=production
+            PORT=${{ secrets.PORT }}
+            DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=${{ secrets.DB_PORT }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASS=${{ secrets.DB_PASS }}
             DB_NAME=${{ secrets.DB_NAME }}
-            PORT=${{ secrets.PORT }}
+            AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}
+            TELEGRAM_BOT_TOKEN=$PRIMARY_TELEGRAM_TOKEN
+            TELEGRAM_BOT_TOKENS=${{ secrets.TELEGRAM_BOT_TOKENS }}
             WEB_APP_URL=${{ secrets.WEB_APP_URL }}
+            BOT_WEB_APP_URL=${{ secrets.BOT_WEB_APP_URL }}
+            SKIP_AUTH=false
             EOF
+            chmod 600 "${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
 
-            chmod 600 ~/deploy/back/.env
+            cd "${{ secrets.VPS_DEPLOY_PATH }}/deploy"
+            docker-compose build backend
+            docker-compose up -d postgres backend
 
-            # 3) deploy (build happens inside Docker)
-            cd ~/deploy/back
-            docker compose -f docker-compose.prod.yaml up -d --build
+            curl -fsS https://api.216.57.105.133.sslip.io/health >/dev/null

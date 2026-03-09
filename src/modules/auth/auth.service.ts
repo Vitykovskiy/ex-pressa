@@ -16,6 +16,15 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
+  private get telegramBotTokens(): string[] {
+    const primary = this.config.get<string>('TELEGRAM_BOT_TOKEN', '');
+    const extra = this.config.get<string>('TELEGRAM_BOT_TOKENS', '');
+
+    return [primary, ...extra.split(',')]
+      .map((token) => token.trim())
+      .filter((token, index, items) => Boolean(token) && items.indexOf(token) === index);
+  }
+
   private get jwtSecret(): string {
     const secret = this.config.get<string>('AUTH_JWT_SECRET', '');
     if (!secret) {
@@ -25,9 +34,17 @@ export class AuthService {
   }
 
   async authTelegram(initData: string): Promise<User> {
-    const botToken = this.config.get<string>('TELEGRAM_BOT_TOKEN', '');
+    const tokens = this.telegramBotTokens;
+    let result = { ok: false, error: 'botToken пустой' } as ReturnType<
+      typeof verifyTelegramInitData
+    >;
 
-    const result = verifyTelegramInitData(initData, botToken);
+    for (const token of tokens) {
+      result = verifyTelegramInitData(initData, token);
+      if (result.ok) {
+        break;
+      }
+    }
 
     if (!result.ok) {
       throw new UnauthorizedException(result.error);

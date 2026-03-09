@@ -1,8 +1,11 @@
-import { Update, Start, Ctx } from 'nestjs-telegraf';
+import { Public } from '@modules/auth/public.decorator';
+import { Ctx, Start, Update } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../users.service';
+
 const WEB_APP_URL = process.env.WEB_APP_URL ?? 'http://localhost:3000';
-import { Public } from '@modules/auth/public.decorator';
+const BOT_WEB_APP_URL =
+  process.env.BOT_WEB_APP_URL ?? WEB_APP_URL.split(',')[0]?.trim() ?? 'http://localhost:3000';
 
 function getFrom(ctx: Context) {
   const from = ctx.message?.from || ctx.callbackQuery?.from || ctx.from;
@@ -33,7 +36,7 @@ export class UsersBotController {
     await ctx.reply(
       `Здравствуйте, ${user.name}`,
       Markup.inlineKeyboard([
-        [Markup.button.webApp('Открыть меню', WEB_APP_URL)],
+        [Markup.button.webApp('Открыть меню', BOT_WEB_APP_URL)],
       ]),
     );
   }

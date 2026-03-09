@@ -54,9 +54,11 @@ docker compose -f docker-compose.prod.yaml up -d
 
 ## Переменные окружения
 
-- `TELEGRAM_BOT_TOKEN` — токен бота
+- `TELEGRAM_BOT_TOKEN` — основной токен бота (customer, используется для polling/уведомлений)
+- `TELEGRAM_BOT_TOKENS` — дополнительные токены ботов для валидации Telegram WebApp initData
 - `AUTH_JWT_SECRET` — ключ для JWT
 - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME` — параметры PostgreSQL
 - `PORT` — порт приложения
 - `WEB_APP_URL` — URL фронтенда (можно перечислить несколько через запятую)
+- `BOT_WEB_APP_URL` — URL customer web app для кнопки `/start` в основном Telegram-боте
 - `SKIP_AUTH` — `true` отключает JWT-проверку (только для dev/test)

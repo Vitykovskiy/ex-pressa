@@ -75,15 +75,15 @@ export async function ensureRoles(ds: DataSource): Promise<{
   const repo = ds.getRepository(Role);
   const userRole = await repo.save({
     code: RoleCode.USER,
-    name: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
+    name: 'Пользователь',
   });
   const baristaRole = await repo.save({
     code: RoleCode.BARISTA,
-    name: 'Р‘Р°СЂРёСЃС‚Р°',
+    name: 'Бариста',
   });
   const adminRole = await repo.save({
     code: RoleCode.ADMIN,
-    name: 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ',
+    name: 'Администратор',
   });
   return { userRole, baristaRole, adminRole };
 }

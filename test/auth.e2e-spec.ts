@@ -26,13 +26,13 @@ describe('Auth (e2e)', () => {
   });
 
   describe('GET /auth/me', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· СЃРµСЃСЃРёРё', () => {
+    it('возвращает 401 без сессии', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/auth/me')
         .expect(401);
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїСЂРё РІР°Р»РёРґРЅРѕРј С‚РѕРєРµРЅРµ', async () => {
+    it('возвращает текущего пользователя при валидном токене', async () => {
       const user = await createUser(testApp.ds, [userRole]);
       const cookie = authCookie(testApp.module, user);
 
@@ -47,7 +47,7 @@ describe('Auth (e2e)', () => {
       });
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 СЃ РЅРµРІР°Р»РёРґРЅС‹Рј С‚РѕРєРµРЅРѕРј', () => {
+    it('возвращает 401 с невалидным токеном', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/auth/me')
         .set('Cookie', 'session=invalidtoken')
@@ -56,13 +56,13 @@ describe('Auth (e2e)', () => {
   });
 
   describe('POST /auth/telegram', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· Р·Р°РіРѕР»РѕРІРєР° Authorization', () => {
+    it('возвращает 401 без заголовка Authorization', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/auth/telegram')
         .expect(401);
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 СЃ РЅРµРІРµСЂРЅС‹Рј С„РѕСЂРјР°С‚РѕРј Р·Р°РіРѕР»РѕРІРєР°', () => {
+    it('возвращает 401 с неверным форматом заголовка', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/auth/telegram')
         .set('Authorization', 'Bearer invalid')

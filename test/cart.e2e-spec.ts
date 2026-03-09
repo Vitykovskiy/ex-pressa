@@ -37,11 +37,11 @@ describe('Cart (e2e)', () => {
     adminCookie = authCookie(testApp.module, adminUser);
     userCookie = authCookie(testApp.module, regularUser);
 
-    // РЎРѕР·РґР°С‘Рј РєР°С‚Р°Р»РѕРі РґР»СЏ С‚РµСЃС‚РѕРІ РєРѕСЂР·РёРЅС‹
+    // Создаём каталог для тестов корзины
     const group = await request(testApp.app.getHttpServer() as App)
       .post('/catalog/product-groups')
       .set('Cookie', adminCookie)
-      .send({ name: 'Р”Р»СЏ РєРѕСЂР·РёРЅС‹', sortOrder: 1 })
+      .send({ name: 'Для корзины', sortOrder: 1 })
       .then((r) => r.body);
 
     const food = await request(testApp.app.getHttpServer() as App)
@@ -49,7 +49,7 @@ describe('Cart (e2e)', () => {
       .set('Cookie', adminCookie)
       .send({
         groupId: group.id,
-        name: 'РџРёСЂРѕР¶РѕРє',
+        name: 'Пирожок',
         type: 'FOOD',
         isActive: true,
         isAvailable: true,
@@ -68,7 +68,7 @@ describe('Cart (e2e)', () => {
       .set('Cookie', adminCookie)
       .send({
         groupId: group.id,
-        name: 'Р›Р°С‚С‚Рµ С‚РµСЃС‚',
+        name: 'Латте тест',
         type: 'DRINK',
         isActive: true,
         isAvailable: true,
@@ -93,7 +93,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('GET /cart', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚СѓСЋ РєРѕСЂР·РёРЅСѓ РґР»СЏ РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', async () => {
+    it('возвращает пустую корзину для нового пользователя', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
@@ -102,7 +102,7 @@ describe('Cart (e2e)', () => {
       expect(res.body.items).toEqual([]);
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· Р°РІС‚РѕСЂРёР·Р°С†РёРё', () => {
+    it('возвращает 401 без авторизации', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .expect(401);
@@ -110,7 +110,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('POST /cart/items', () => {
-    it('РґРѕР±Р°РІР»СЏРµС‚ РїРѕР·РёС†РёСЋ РІ РєРѕСЂР·РёРЅСѓ', async () => {
+    it('добавляет позицию в корзину', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -119,12 +119,12 @@ describe('Cart (e2e)', () => {
 
       expect(res.body.items).toHaveLength(1);
       expect(res.body.items[0]).toMatchObject({
-        productName: 'РџРёСЂРѕР¶РѕРє',
+        productName: 'Пирожок',
         quantity: 2,
       });
     });
 
-    it('РґРѕР±Р°РІР»СЏРµС‚ РЅР°РїРёС‚РѕРє СЃ СЂР°Р·РјРµСЂРѕРј', async () => {
+    it('добавляет напиток с размером', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -132,12 +132,12 @@ describe('Cart (e2e)', () => {
         .expect(201);
 
       const items: any[] = res.body.items;
-      const drinkItem = items.find((i) => i.productName === 'Р›Р°С‚С‚Рµ С‚РµСЃС‚');
+      const drinkItem = items.find((i) => i.productName === 'Латте тест');
       expect(drinkItem).toBeDefined();
       expect(drinkItem.sizeCode).toBe('M');
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 404 РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РїСЂРѕРґСѓРєС‚Р°', () => {
+    it('возвращает 404 для несуществующего продукта', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)
@@ -147,14 +147,14 @@ describe('Cart (e2e)', () => {
   });
 
   describe('PATCH /cart/items/:itemId', () => {
-    it('РёР·РјРµРЅСЏРµС‚ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР·РёС†РёРё', async () => {
-      // РЎРЅР°С‡Р°Р»Р° РїРѕР»СѓС‡Р°РµРј РєРѕСЂР·РёРЅСѓ СЃ РїРѕР·РёС†РёРµР№
+    it('изменяет количество позиции', async () => {
+      // Сначала получаем корзину с позицией
       const cart = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
         .then((r) => r.body);
 
-      const item = cart.items.find((i: any) => i.productName === 'РџРёСЂРѕР¶РѕРє');
+      const item = cart.items.find((i: any) => i.productName === 'Пирожок');
       expect(item).toBeDefined();
 
       const res = await request(testApp.app.getHttpServer() as App)
@@ -169,7 +169,7 @@ describe('Cart (e2e)', () => {
   });
 
   describe('DELETE /cart/items/:itemId', () => {
-    it('СѓРґР°Р»СЏРµС‚ РїРѕР·РёС†РёСЋ РёР· РєРѕСЂР·РёРЅС‹', async () => {
+    it('удаляет позицию из корзины', async () => {
       const cart = await request(testApp.app.getHttpServer() as App)
         .get('/cart')
         .set('Cookie', userCookie)
@@ -189,8 +189,8 @@ describe('Cart (e2e)', () => {
   });
 
   describe('DELETE /cart', () => {
-    it('РѕС‡РёС‰Р°РµС‚ РєРѕСЂР·РёРЅСѓ', async () => {
-      // Р”РѕР±Р°РІР»СЏРµРј РїРѕР·РёС†РёСЋ
+    it('очищает корзину', async () => {
+      // Добавляем позицию
       await request(testApp.app.getHttpServer() as App)
         .post('/cart/items')
         .set('Cookie', userCookie)

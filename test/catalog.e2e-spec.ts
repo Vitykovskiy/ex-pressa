@@ -36,7 +36,7 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('GET /catalog', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ РєР°С‚Р°Р»РѕРі', async () => {
+    it('возвращает пустой каталог', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .get('/catalog')
         .set('Cookie', userCookie)
@@ -47,7 +47,7 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('GET /catalog/addon-groups', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ СЃРїРёСЃРѕРє РіСЂСѓРїРї РґРѕРїРѕРІ', async () => {
+    it('возвращает пустой список групп допов', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .get('/catalog/addon-groups')
         .set('Cookie', userCookie)
@@ -58,58 +58,58 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('POST /catalog/product-groups', () => {
-    it('СЃРѕР·РґР°С‘С‚ РіСЂСѓРїРїСѓ С‚РѕРІР°СЂРѕРІ (admin)', async () => {
+    it('создаёт группу товаров (admin)', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РќР°РїРёС‚РєРё', sortOrder: 1, isActive: true })
+        .send({ name: 'Напитки', sortOrder: 1, isActive: true })
         .expect(201);
 
       expect(res.body).toMatchObject({
-        name: 'РќР°РїРёС‚РєРё',
+        name: 'Напитки',
         sortOrder: 1,
         isActive: true,
       });
       expect(res.body.id).toBeDefined();
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 403 РґР»СЏ РѕР±С‹С‡РЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ', () => {
+    it('возвращает 403 для обычного пользователя', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', userCookie)
-        .send({ name: 'Р•РґР°' })
+        .send({ name: 'Еда' })
         .expect(403);
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 401 Р±РµР· Р°РІС‚РѕСЂРёР·Р°С†РёРё', () => {
+    it('возвращает 401 без авторизации', () => {
       return request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
-        .send({ name: 'Р•РґР°' })
+        .send({ name: 'Еда' })
         .expect(401);
     });
   });
 
   describe('PATCH /catalog/product-groups/:id', () => {
-    it('РѕР±РЅРѕРІР»СЏРµС‚ РіСЂСѓРїРїСѓ С‚РѕРІР°СЂРѕРІ', async () => {
+    it('обновляет группу товаров', async () => {
       const created = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'Р”РµСЃРµСЂС‚С‹', sortOrder: 3, isActive: true })
+        .send({ name: 'Десерты', sortOrder: 3, isActive: true })
         .expect(201);
 
       const res = await request(testApp.app.getHttpServer() as App)
         .patch(`/catalog/product-groups/${created.body.id}`)
         .set('Cookie', adminCookie)
-        .send({ name: 'Р”РµСЃРµСЂС‚С‹ РѕР±РЅРѕРІР»С‘РЅРЅС‹Рµ', sortOrder: 5 })
+        .send({ name: 'Десерты обновлённые', sortOrder: 5 })
         .expect(200);
 
       expect(res.body).toMatchObject({
-        name: 'Р”РµСЃРµСЂС‚С‹ РѕР±РЅРѕРІР»С‘РЅРЅС‹Рµ',
+        name: 'Десерты обновлённые',
         sortOrder: 5,
       });
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 404 РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµР№ РіСЂСѓРїРїС‹', () => {
+    it('возвращает 404 для несуществующей группы', () => {
       return request(testApp.app.getHttpServer() as App)
         .patch('/catalog/product-groups/99999')
         .set('Cookie', adminCookie)
@@ -119,11 +119,11 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('DELETE /catalog/product-groups/:id', () => {
-    it('СѓРґР°Р»СЏРµС‚ РіСЂСѓРїРїСѓ С‚РѕРІР°СЂРѕРІ', async () => {
+    it('удаляет группу товаров', async () => {
       const created = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'Р’СЂРµРјРµРЅРЅР°СЏ РіСЂСѓРїРїР°' })
+        .send({ name: 'Временная группа' })
         .expect(201);
 
       await request(testApp.app.getHttpServer() as App)
@@ -139,23 +139,23 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('POST /catalog/addon-groups', () => {
-    it('СЃРѕР·РґР°С‘С‚ РіСЂСѓРїРїСѓ РґРѕРїРѕРІ (admin)', async () => {
+    it('создаёт группу допов (admin)', async () => {
       const res = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/addon-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РЎРёСЂРѕРїС‹', sortOrder: 1, isActive: true })
+        .send({ name: 'Сиропы', sortOrder: 1, isActive: true })
         .expect(201);
 
-      expect(res.body).toMatchObject({ name: 'РЎРёСЂРѕРїС‹', isActive: true });
+      expect(res.body).toMatchObject({ name: 'Сиропы', isActive: true });
     });
   });
 
   describe('POST /catalog/addons', () => {
-    it('СЃРѕР·РґР°С‘С‚ РґРѕРї РІ РіСЂСѓРїРїРµ', async () => {
+    it('создаёт доп в группе', async () => {
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/addon-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РўРѕРїРїРёРЅРіРё' })
+        .send({ name: 'Топпинги' })
         .expect(201);
 
       const res = await request(testApp.app.getHttpServer() as App)
@@ -163,32 +163,32 @@ describe('Catalog (e2e)', () => {
         .set('Cookie', adminCookie)
         .send({
           addonGroupId: group.body.id,
-          name: 'РљР°СЂР°РјРµР»СЊ',
+          name: 'Карамель',
           priceRub: 50,
           isActive: true,
         })
         .expect(201);
 
-      expect(res.body).toMatchObject({ name: 'РљР°СЂР°РјРµР»СЊ', priceRub: 50 });
+      expect(res.body).toMatchObject({ name: 'Карамель', priceRub: 50 });
     });
   });
 
   describe('POST /catalog/products + GET /catalog', () => {
-    it('СЃРѕР·РґР°С‘С‚ РїСЂРѕРґСѓРєС‚ Рё РѕРЅ РїРѕСЏРІР»СЏРµС‚СЃСЏ РІ РєР°С‚Р°Р»РѕРіРµ', async () => {
-      // РЎРѕР·РґР°С‘Рј РіСЂСѓРїРїСѓ
+    it('создаёт продукт и он появляется в каталоге', async () => {
+      // Создаём группу
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РљРѕС„Рµ', sortOrder: 10, isActive: true })
+        .send({ name: 'Кофе', sortOrder: 10, isActive: true })
         .expect(201);
 
-      // РЎРѕР·РґР°С‘Рј РїСЂРѕРґСѓРєС‚
+      // Создаём продукт
       const product = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/products')
         .set('Cookie', adminCookie)
         .send({
           groupId: group.body.id,
-          name: 'Р­СЃРїСЂРµСЃСЃРѕ',
+          name: 'Эспрессо',
           type: 'FOOD',
           isActive: true,
           isAvailable: true,
@@ -196,16 +196,16 @@ describe('Catalog (e2e)', () => {
         })
         .expect(201);
 
-      expect(product.body).toMatchObject({ name: 'Р­СЃРїСЂРµСЃСЃРѕ', type: 'FOOD' });
+      expect(product.body).toMatchObject({ name: 'Эспрессо', type: 'FOOD' });
 
-      // РЎРѕР·РґР°С‘Рј С†РµРЅСѓ
+      // Создаём цену
       await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-prices')
         .set('Cookie', adminCookie)
         .send({ productId: product.body.id, priceRub: 90, isActive: true })
         .expect(201);
 
-      // РџСЂРѕРІРµСЂСЏРµРј РєР°С‚Р°Р»РѕРі
+      // Проверяем каталог
       const catalog = await request(testApp.app.getHttpServer() as App)
         .get('/catalog')
         .set('Cookie', userCookie)
@@ -214,16 +214,16 @@ describe('Catalog (e2e)', () => {
       const coffeeGroup = catalog.body.find((g: any) => g.id === group.body.id);
       expect(coffeeGroup).toBeDefined();
       expect(coffeeGroup.products).toHaveLength(1);
-      expect(coffeeGroup.products[0].name).toBe('Р­СЃРїСЂРµСЃСЃРѕ');
+      expect(coffeeGroup.products[0].name).toBe('Эспрессо');
     });
   });
 
   describe('GET /catalog/products/:id', () => {
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ РїСЂРѕРґСѓРєС‚ РїРѕ id', async () => {
+    it('возвращает продукт по id', async () => {
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'Р§Р°Р№' })
+        .send({ name: 'Чай' })
         .expect(201);
 
       const product = await request(testApp.app.getHttpServer() as App)
@@ -231,7 +231,7 @@ describe('Catalog (e2e)', () => {
         .set('Cookie', adminCookie)
         .send({
           groupId: group.body.id,
-          name: 'Р—РµР»С‘РЅС‹Р№ С‡Р°Р№',
+          name: 'Зелёный чай',
           type: 'FOOD',
           isActive: true,
           isAvailable: true,
@@ -245,11 +245,11 @@ describe('Catalog (e2e)', () => {
 
       expect(res.body).toMatchObject({
         id: product.body.id,
-        name: 'Р—РµР»С‘РЅС‹Р№ С‡Р°Р№',
+        name: 'Зелёный чай',
       });
     });
 
-    it('РІРѕР·РІСЂР°С‰Р°РµС‚ 404 РґР»СЏ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РїСЂРѕРґСѓРєС‚Р°', () => {
+    it('возвращает 404 для несуществующего продукта', () => {
       return request(testApp.app.getHttpServer() as App)
         .get('/catalog/products/99999')
         .set('Cookie', userCookie)
@@ -258,11 +258,11 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('PUT /catalog/products/:id/prices', () => {
-    it('Р·Р°РјРµРЅСЏРµС‚ С†РµРЅС‹ РїСЂРѕРґСѓРєС‚Р°', async () => {
+    it('заменяет цены продукта', async () => {
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/product-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РЎРјСѓР·Рё' })
+        .send({ name: 'Смузи' })
         .expect(201);
 
       const product = await request(testApp.app.getHttpServer() as App)
@@ -270,7 +270,7 @@ describe('Catalog (e2e)', () => {
         .set('Cookie', adminCookie)
         .send({
           groupId: group.body.id,
-          name: 'РњР°РЅРіРѕ СЃРјСѓР·Рё',
+          name: 'Манго смузи',
           type: 'DRINK',
           isActive: true,
           isAvailable: true,
@@ -297,29 +297,29 @@ describe('Catalog (e2e)', () => {
   });
 
   describe('PATCH /catalog/addon-groups/:id', () => {
-    it('РѕР±РЅРѕРІР»СЏРµС‚ РіСЂСѓРїРїСѓ РґРѕРїРѕРІ', async () => {
+    it('обновляет группу допов', async () => {
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/addon-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РњРѕР»РѕРєРѕ' })
+        .send({ name: 'Молоко' })
         .expect(201);
 
       const res = await request(testApp.app.getHttpServer() as App)
         .patch(`/catalog/addon-groups/${group.body.id}`)
         .set('Cookie', adminCookie)
-        .send({ name: 'РђР»СЊС‚РµСЂРЅР°С‚РёРІРЅРѕРµ РјРѕР»РѕРєРѕ' })
+        .send({ name: 'Альтернативное молоко' })
         .expect(200);
 
-      expect(res.body).toMatchObject({ name: 'РђР»СЊС‚РµСЂРЅР°С‚РёРІРЅРѕРµ РјРѕР»РѕРєРѕ' });
+      expect(res.body).toMatchObject({ name: 'Альтернативное молоко' });
     });
   });
 
   describe('DELETE /catalog/addons/:id', () => {
-    it('СѓРґР°Р»СЏРµС‚ РґРѕРї', async () => {
+    it('удаляет доп', async () => {
       const group = await request(testApp.app.getHttpServer() as App)
         .post('/catalog/addon-groups')
         .set('Cookie', adminCookie)
-        .send({ name: 'РЎРїРµС†РёРё' })
+        .send({ name: 'Специи' })
         .expect(201);
 
       const addon = await request(testApp.app.getHttpServer() as App)
@@ -327,7 +327,7 @@ describe('Catalog (e2e)', () => {
         .set('Cookie', adminCookie)
         .send({
           addonGroupId: group.body.id,
-          name: 'РљРѕСЂРёС†Р°',
+          name: 'Корица',
           priceRub: 30,
           isActive: true,
         })

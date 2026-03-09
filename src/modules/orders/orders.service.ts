@@ -47,23 +47,21 @@ export class OrdersService {
       },
     });
 
-    if (!cart)
-      throw new NotFoundException('РљРѕСЂР·РёРЅР° РЅРµ РЅР°Р№РґРµРЅР°');
+    if (!cart) throw new NotFoundException('Корзина не найдена');
     if (!cart.user.isConfirmed) {
       throw new BadRequestException(
-        'РђРєРєР°СѓРЅС‚ РЅРµ РїРѕРґС‚РІРµСЂР¶РґС‘РЅ. РћР±СЂР°С‚РёС‚РµСЃСЊ Рє Р±Р°СЂРёСЃС‚Рµ.',
+        'Аккаунт не подтверждён. Обратитесь к баристе.',
       );
     }
-    if (!cart.items?.length)
-      throw new BadRequestException('РљРѕСЂР·РёРЅР° РїСѓСЃС‚Р°');
+    if (!cart.items?.length) throw new BadRequestException('Корзина пуста');
 
     const slot = await this.timeSlots.findOne({
       where: { id: dto.timeSlotId, isActive: true },
     });
-    if (!slot) throw new NotFoundException('РЎР»РѕС‚ РЅРµ РЅР°Р№РґРµРЅ');
+    if (!slot) throw new NotFoundException('Слот не найден');
     if (slot.bookedCount >= slot.capacity) {
       throw new BadRequestException(
-        'РЎР»РѕС‚ Р·Р°РїРѕР»РЅРµРЅ. Р’С‹Р±РµСЂРёС‚Рµ РґСЂСѓРіРѕРµ РІСЂРµРјСЏ.',
+        'Слот заполнен. Выберите другое время.',
       );
     }
 
@@ -75,7 +73,7 @@ export class OrdersService {
       const product = cartItem.product;
       if (!product.isActive || !product.isAvailable) {
         throw new BadRequestException(
-          `РџРѕР·РёС†РёСЏ "${product.name}" РЅРµРґРѕСЃС‚СѓРїРЅР°`,
+          `Позиция "${product.name}" недоступна`,
         );
       }
 
@@ -88,7 +86,7 @@ export class OrdersService {
       });
       if (!price) {
         throw new BadRequestException(
-          `Р¦РµРЅР° РґР»СЏ РїРѕР·РёС†РёРё "${product.name}" РЅРµ РЅР°Р№РґРµРЅР°`,
+          `Цена для позиции "${product.name}" не найдена`,
         );
       }
 
@@ -112,7 +110,7 @@ export class OrdersService {
           const addon = cartAddon.addon;
           if (!addon.isActive) {
             throw new BadRequestException(
-              `Р”РѕРї "${addon.name}" РЅРµРґРѕСЃС‚СѓРїРµРЅ`,
+              `Доп "${addon.name}" недоступен`,
             );
           }
 
@@ -147,10 +145,10 @@ export class OrdersService {
 
     const saved = await this.orders.save(order);
 
-    // РёРЅРєСЂРµРјРµРЅС‚ СЃС‡С‘С‚С‡РёРєР° Р·Р°РЅСЏС‚С‹С… РјРµСЃС‚ РІ СЃР»РѕС‚Рµ
+    // Инкремент счётчика занятых мест в слоте
     await this.timeSlots.increment({ id: slot.id }, 'bookedCount', 1);
 
-    // РѕС‡РёСЃС‚РєР° РєРѕСЂР·РёРЅС‹
+    // Очистка корзины
     await this.carts.remove(cart);
 
     return saved;
@@ -176,7 +174,7 @@ export class OrdersService {
     const expected = this.workflow.getExpectedNextStatus(order.status);
     if (expected !== dto.status) {
       throw new BadRequestException(
-        `РќРµР»СЊР·СЏ РїРµСЂРµРІРµСЃС‚Рё Р·Р°РєР°Р· РёР· ${order.status} РІ ${dto.status}`,
+        `Нельзя перевести заказ из ${order.status} в ${dto.status}`,
       );
     }
 
@@ -194,7 +192,7 @@ export class OrdersService {
 
     const saved = await this.orders.save(order);
 
-    // СѓРІРµРґРѕРјР»СЏРµРј РєР»РёРµРЅС‚Р° РєРѕРіРґР° Р·Р°РєР°Р· РіРѕС‚РѕРІ
+    // Уведомляем клиента, когда заказ готов
     if (this.workflow.shouldNotifyReady(dto.status)) {
       const withUser = await this.orders.findOne({
         where: { id: orderId },
@@ -211,13 +209,13 @@ export class OrdersService {
 
     if (!this.workflow.canReject(order.status)) {
       throw new BadRequestException(
-        `РќРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ Р·Р°РєР°Р· РІ СЃС‚Р°С‚СѓСЃРµ ${order.status}`,
+        `Нельзя отклонить заказ в статусе ${order.status}`,
       );
     }
 
     this.workflow.applyRejection(order, dto.reason ?? '');
 
-    // РѕСЃРІРѕР±РѕР¶РґР°РµРј РјРµСЃС‚Рѕ РІ СЃР»РѕС‚Рµ
+    // Освобождаем место в слоте
     if (order.timeSlot) {
       await this.timeSlots.decrement(
         { id: order.timeSlot.id },
@@ -234,7 +232,7 @@ export class OrdersService {
       where: { id: orderId },
       relations: { timeSlot: true },
     });
-    if (!order) throw new NotFoundException('Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ');
+    if (!order) throw new NotFoundException('Заказ не найден');
     return order;
   }
 

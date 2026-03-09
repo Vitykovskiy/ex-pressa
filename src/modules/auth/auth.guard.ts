@@ -14,7 +14,6 @@ import { parseBoolean } from './helpers';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { isSessionPayload } from './types';
 
-/** Мок-пользователь для режима SKIP_AUTH=true — имеет все роли */
 const DEV_USER: User = Object.assign(new User(), {
   id: 0,
   name: 'Dev User',
@@ -32,9 +31,12 @@ const DEV_USER: User = Object.assign(new User(), {
   ],
 });
 
+const ALL_ROLES = DEV_USER.roles;
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly skipAuth: boolean;
+  private readonly skipRoles: boolean;
 
   constructor(
     private readonly reflector: Reflector,
@@ -43,6 +45,9 @@ export class AuthGuard implements CanActivate {
     private readonly users: UsersService,
   ) {
     this.skipAuth = parseBoolean(this.config.get<string>('SKIP_AUTH', 'false'));
+    this.skipRoles = parseBoolean(
+      this.config.get<string>('SKIP_ROLES', 'false'),
+    );
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -99,7 +104,9 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Пользователь не найден');
     }
 
-    (request as Request & { user: User }).user = user;
+    (request as Request & { user: User }).user = this.skipRoles
+      ? Object.assign(new User(), user, { roles: ALL_ROLES })
+      : user;
     return true;
   }
 }

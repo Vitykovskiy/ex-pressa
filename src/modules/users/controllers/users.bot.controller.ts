@@ -5,13 +5,15 @@ import { UsersService } from '../users.service';
 
 const WEB_APP_URL = process.env.WEB_APP_URL ?? 'http://localhost:3000';
 const BOT_WEB_APP_URL =
-  process.env.BOT_WEB_APP_URL ?? WEB_APP_URL.split(',')[0]?.trim() ?? 'http://localhost:3000';
+  process.env.BOT_WEB_APP_URL ??
+  WEB_APP_URL.split(',')[0]?.trim() ??
+  'http://localhost:3000';
 
 function getFrom(ctx: Context) {
   const from = ctx.message?.from || ctx.callbackQuery?.from || ctx.from;
   return {
     tgId: from?.id?.toString(),
-    tgUsername: from?.username || null,
+    tgUsername: from?.username || undefined,
     name:
       [from?.first_name, from?.last_name].filter(Boolean).join(' ') ||
       from?.username ||
@@ -29,7 +31,7 @@ export class UsersBotController {
     const from = getFrom(ctx);
     const user = await this.users.createOrFindByTgId({
       tgId: from.tgId ?? '',
-      tgUsername: from.tgUsername ?? undefined,
+      tgUsername: from.tgUsername,
       name: from.name,
     });
 
@@ -41,3 +43,4 @@ export class UsersBotController {
     );
   }
 }
+

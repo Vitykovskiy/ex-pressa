@@ -72,4 +72,11 @@ jobs:
             done
             docker-compose up -d postgres backend
 
-            curl -fsS https://api.216.57.105.133.sslip.io/health >/dev/null
+            for attempt in $(seq 1 12); do
+              if curl -fsS https://api.216.57.105.133.sslip.io/health >/dev/null; then
+                exit 0
+              fi
+              sleep 5
+            done
+
+            exit 1

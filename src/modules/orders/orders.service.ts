@@ -50,11 +50,6 @@ export class OrdersService {
     });
 
     if (!cart) throw new NotFoundException('Корзина не найдена');
-    if (!cart.user.isConfirmed) {
-      throw new BadRequestException(
-        'Аккаунт не подтверждён. Обратитесь к баристе.',
-      );
-    }
     if (!cart.items?.length) throw new BadRequestException('Корзина пуста');
 
     const slot = await this.timeSlots.findOne({

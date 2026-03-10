@@ -198,6 +198,37 @@ describe('Orders (e2e)', () => {
       expect(res.body.items).toHaveLength(1);
     });
 
+    it('создаёт заказ даже для неподтверждённого аккаунта', async () => {
+      const user = await createUser(testApp.ds, [userRole], {
+        name: 'Unconfirmed Order Creator',
+        isConfirmed: false,
+      });
+      const cookie = authCookie(testApp.module, user);
+
+      await setupCatalogAndCart(
+        testApp.app.getHttpServer() as App,
+        adminCookie,
+        cookie,
+      );
+
+      const slot = await createTimeSlot(testApp.ds, {
+        timeFrom: '11:20:00',
+        timeTo: '11:30:00',
+      });
+
+      const res = await request(testApp.app.getHttpServer() as App)
+        .post('/orders/from-cart')
+        .set('Cookie', cookie)
+        .send({ timeSlotId: slot.id })
+        .expect(201);
+
+      expect(res.body).toMatchObject({
+        status: 'CREATED',
+        totalRub: 150,
+      });
+      expect(res.body.items).toHaveLength(1);
+    });
+
     it('возвращает 400 для заполненного слота', async () => {
       const user = await createUser(testApp.ds, [userRole], {
         name: 'Blocked User',

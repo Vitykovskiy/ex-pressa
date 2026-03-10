@@ -2,6 +2,7 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
+import { APP_VERSION_INFO } from './generated/app-version';
 
 export const WEB_APP_URL = process.env.WEB_APP_URL ?? 'http://localhost:3000';
 
@@ -24,7 +25,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use('/health', (_req: unknown, res: { json: (body: unknown) => void }) => {
-    res.json({ status: 'ok' });
+    res.json({ status: 'ok', app: APP_VERSION_INFO });
   });
 
   const swaggerConfig = new DocumentBuilder()

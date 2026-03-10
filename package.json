@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "version:generate": "node scripts/version/write-build-version.mjs",
     "build": "npm run check:text && nest build && tsc-alias -p tsconfig.json",
     "check:text": "node tools/check-text-corruption.mjs",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

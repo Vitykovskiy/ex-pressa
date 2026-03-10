@@ -30,7 +30,7 @@ jobs:
             ENV_FILE="${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
-            git fetch origin prod:refs/remotes/origin/prod
+            git fetch --prune origin +prod:refs/remotes/origin/prod
             git reset --hard
             git clean -fd
             git checkout -B prod origin/prod

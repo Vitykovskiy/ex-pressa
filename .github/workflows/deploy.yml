@@ -63,6 +63,7 @@ jobs:
             WEB_APP_URL=${{ secrets.WEB_APP_URL }}
             BOT_WEB_APP_URL=${{ secrets.BOT_WEB_APP_URL }}
             SKIP_AUTH=false
+            SKIP_ROLES=true
             ENVEOF
             chmod 600 "$ENV_FILE"
 

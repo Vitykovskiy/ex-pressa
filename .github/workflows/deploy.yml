@@ -25,6 +25,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
+            bash <<'EOF'
             set -euo pipefail
             PRIMARY_TELEGRAM_TOKEN="$(printf '%s' '${{ secrets.TELEGRAM_BOT_TOKENS }}' | cut -d',' -f1)"
             ENV_FILE="${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
@@ -48,7 +49,7 @@ jobs:
             DB_NAME_VALUE="${DB_NAME:-${{ secrets.DB_NAME }}}"
             AUTH_JWT_SECRET_VALUE="${AUTH_JWT_SECRET:-${{ secrets.AUTH_JWT_SECRET }}}"
 
-            cat > "$ENV_FILE" <<EOF
+            cat > "$ENV_FILE" <<ENVEOF
             NODE_ENV=production
             PORT=${{ secrets.PORT }}
             DB_HOST=$DB_HOST_VALUE
@@ -62,7 +63,7 @@ jobs:
             WEB_APP_URL=${{ secrets.WEB_APP_URL }}
             BOT_WEB_APP_URL=${{ secrets.BOT_WEB_APP_URL }}
             SKIP_AUTH=false
-            EOF
+            ENVEOF
             chmod 600 "$ENV_FILE"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/deploy"
@@ -80,3 +81,4 @@ jobs:
             done
 
             exit 1
+            EOF

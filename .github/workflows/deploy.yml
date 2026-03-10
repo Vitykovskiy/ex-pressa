@@ -31,10 +31,10 @@ jobs:
             ENV_FILE="${{ secrets.VPS_DEPLOY_PATH }}/deploy/.env.backend"
 
             cd "${{ secrets.VPS_DEPLOY_PATH }}/backend"
-            git fetch --prune origin +prod:refs/remotes/origin/prod
+            git fetch --prune origin prod
             git reset --hard
             git clean -fd
-            git checkout -B prod origin/prod
+            git checkout -B prod FETCH_HEAD
 
             if [ -f "$ENV_FILE" ]; then
               set -a

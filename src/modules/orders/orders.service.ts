@@ -18,6 +18,7 @@ import { NotificationsService } from './notifications.service';
 import { Cart, CartItem, CartItemAddon } from '@modules/cart';
 import { ProductPrice } from '@modules/catalog';
 import { OrderWorkflowService } from './order-workflow.service';
+import { TimeSlotService } from './time-slot.service';
 
 @Injectable()
 export class OrdersService {
@@ -34,6 +35,7 @@ export class OrdersService {
     private readonly prices: Repository<ProductPrice>,
     @InjectRepository(TimeSlot)
     private readonly timeSlots: Repository<TimeSlot>,
+    private readonly timeSlotService: TimeSlotService,
     private readonly notifications: NotificationsService,
     private readonly workflow: OrderWorkflowService,
   ) {}
@@ -59,6 +61,11 @@ export class OrdersService {
       where: { id: dto.timeSlotId, isActive: true },
     });
     if (!slot) throw new NotFoundException('Слот не найден');
+    if (this.timeSlotService.isSlotExpired(slot)) {
+      throw new BadRequestException(
+        'Слот уже истёк. Выберите другое время.',
+      );
+    }
     if (slot.bookedCount >= slot.capacity) {
       throw new BadRequestException(
         'Слот заполнен. Выберите другое время.',

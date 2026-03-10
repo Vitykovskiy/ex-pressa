@@ -36,6 +36,20 @@ async function createTimeSlot(
   });
 }
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatLocalTime(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
 async function setupCatalogAndCart(
   server: App,
   adminCookie: string,
@@ -119,6 +133,39 @@ describe('Orders (e2e)', () => {
     });
   });
 
+  describe('GET /time-slots/active', () => {
+    it('не возвращает истёкшие слоты за сегодня', async () => {
+      const base = new Date();
+      const futureFrom = new Date(base.getTime() + 20 * 60 * 1000);
+      const futureTo = new Date(base.getTime() + 30 * 60 * 1000);
+      const pastFrom = new Date(base.getTime() - 30 * 60 * 1000);
+      const pastTo = new Date(base.getTime() - 20 * 60 * 1000);
+      const today = formatLocalDate(base);
+
+      await createTimeSlot(testApp.ds, {
+        date: today,
+        timeFrom: formatLocalTime(pastFrom),
+        timeTo: formatLocalTime(pastTo),
+      });
+
+      const futureSlot = await createTimeSlot(testApp.ds, {
+        date: today,
+        timeFrom: formatLocalTime(futureFrom),
+        timeTo: formatLocalTime(futureTo),
+      });
+
+      const res = await request(testApp.app.getHttpServer() as App)
+        .get('/time-slots/active')
+        .set('Cookie', userCookie)
+        .expect(200);
+
+      expect(res.body.map((slot: { id: number }) => slot.id)).toContain(
+        futureSlot.id,
+      );
+      expect(res.body).toHaveLength(1);
+    });
+  });
+
   describe('POST /orders/from-cart', () => {
     it('создаёт заказ из корзины', async () => {
       // Создаём отдельного пользователя для этого теста
@@ -194,6 +241,34 @@ describe('Orders (e2e)', () => {
         .set('Cookie', cookie)
         .send({ timeSlotId: 99999 })
         .expect(404);
+    });
+
+    it('возвращает 400 для истёкшего слота', async () => {
+      const user = await createUser(testApp.ds, [userRole], {
+        name: 'Expired Slot User',
+      });
+      const cookie = authCookie(testApp.module, user);
+
+      await setupCatalogAndCart(
+        testApp.app.getHttpServer() as App,
+        adminCookie,
+        cookie,
+      );
+
+      const base = new Date();
+      const expiredFrom = new Date(base.getTime() - 30 * 60 * 1000);
+      const expiredTo = new Date(base.getTime() - 20 * 60 * 1000);
+      const expiredSlot = await createTimeSlot(testApp.ds, {
+        date: formatLocalDate(base),
+        timeFrom: formatLocalTime(expiredFrom),
+        timeTo: formatLocalTime(expiredTo),
+      });
+
+      await request(testApp.app.getHttpServer() as App)
+        .post('/orders/from-cart')
+        .set('Cookie', cookie)
+        .send({ timeSlotId: expiredSlot.id })
+        .expect(400);
     });
   });
 

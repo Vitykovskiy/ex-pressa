@@ -53,14 +53,40 @@ export class TimeSlotService implements OnModuleInit {
 
   async getActiveSlots(): Promise<TimeSlot[]> {
     const today = this.todayDateString();
+    const nowTime = this.currentTimeString();
     return this.slots.find({
       where: { isActive: true, date: today },
       order: { timeFrom: 'ASC' },
-    });
+    }).then((slots) => slots.filter((slot) => slot.timeTo > nowTime));
+  }
+
+  isSlotExpired(slot: Pick<TimeSlot, 'date' | 'timeTo'>): boolean {
+    const today = this.todayDateString();
+    if (slot.date < today) {
+      return true;
+    }
+
+    if (slot.date > today) {
+      return false;
+    }
+
+    return slot.timeTo <= this.currentTimeString();
   }
 
   private todayDateString(): string {
-    return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private currentTimeString(): string {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   private minutesToTime(totalMinutes: number): string {
